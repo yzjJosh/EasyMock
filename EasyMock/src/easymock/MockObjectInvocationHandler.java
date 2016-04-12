@@ -7,7 +7,8 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		// TODO Auto-generated method stub
+		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
+			return this;
 		return null;
 	}
 
