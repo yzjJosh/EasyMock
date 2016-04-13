@@ -29,6 +29,7 @@ public class EasyMock {
 	 * Specify the expected behavior for the last called method. This method works only for method which has a return value.
 	 *	@return the controller
 	 * @throws IllegalStateException if no method can be controlled
+	 * @throws IllegalTypeException if the last called method has void return type
 	 */
 	public static<T> MockControl.ControlReturn expect(T value) {
 		MockControl control = controlLastCalledMethod();
@@ -41,6 +42,7 @@ public class EasyMock {
 	 * Specify the expected behavior for the last called method. This method works only for method which has no return value.
 	 * @return the controller
 	 * @throws IllegalStateException if no method can be controlled
+	 * @throws IllegalTypeException if the last called method has a non-void return type
 	 */
 	public static MockControl.ControlVoid expectLastCall(){
 		MockControl control = controlLastCalledMethod();
