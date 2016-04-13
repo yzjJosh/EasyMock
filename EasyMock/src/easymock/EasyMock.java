@@ -1,12 +1,6 @@
 package easymock;
 
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-
-import exceptions.IlegalTypeException;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 
 public class EasyMock {
 	

@@ -3,7 +3,7 @@ package easymock;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import exceptions.IlegalTypeException;
+import exceptions.IllegalTypeException;
 
 public class MockControl {
 	
@@ -38,11 +38,25 @@ public class MockControl {
 		this.voidController = new ControlVoid();
 	}
 	
+	/**
+	 * Get the return controller for this controlled method
+	 * @return the return controller
+	 * @throws IllegalTypeException if the return type of the controlled method is void
+	 */
 	public ControlReturn controlReturn(){
+		if(method.getReturnType() == void.class || method.getReturnType() == Void.class)
+			throw new IllegalTypeException("Cannot get return controller for a void returned method");
 		return returnController;
 	}
 	
+	/**
+	 * Get the void controller for this controlled method
+	 * @return the return controller
+	 * @throws IllegalTypeException if the return type of the controlled method is not void
+	 */
 	public ControlVoid controlVoid(){
+		if(method.getReturnType() != void.class && method.getReturnType() != Void.class)
+			throw new IllegalTypeException("Cannot get void controller for a non-void returned method");
 		return voidController;
 	}
 	
@@ -62,11 +76,11 @@ public class MockControl {
 			Class<?> retType = returnType();
 			if(retType.isPrimitive()){
 				if(val == null)
-					throw new IlegalTypeException("Return type is wrong!");
+					throw new IllegalTypeException("Return type is wrong!");
 				if(!PRIMITIVES_TO_WRAPPERS.get(retType).isInstance(val))
-					throw new IlegalTypeException("Return type is wrong!");
+					throw new IllegalTypeException("Return type is wrong!");
 			} else if(val != null && !retType.isInstance(val))
-				throw new IlegalTypeException("Return type is wrong!");
+				throw new IllegalTypeException("Return type is wrong!");
 			handler.add(method, arguments, val);
 			return this;
 		}
