@@ -18,9 +18,7 @@ public class EasyMock {
 	
 	
 	//Following is an example
-	interface Foo{
-		
-	}
+	interface Foo{}
 	
 	public static void main(String[] args){
 		Foo f = (Foo) createMock(Foo.class);

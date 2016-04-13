@@ -11,5 +11,4 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 			return this;
 		return null;
 	}
-
 }
