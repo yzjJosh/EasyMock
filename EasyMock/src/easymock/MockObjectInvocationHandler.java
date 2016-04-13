@@ -2,69 +2,69 @@ package easymock;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class MockObjectInvocationHandler implements InvocationHandler{
 
-	Map <String, Map<Object[], Object>> map = new HashMap<>();
+	private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_VALUES = new HashMap<>();
+	
+	static{
+		PRIMITIVES_DEFAULT_VALUES.put(boolean.class, false);
+		PRIMITIVES_DEFAULT_VALUES.put(byte.class, 0);
+		PRIMITIVES_DEFAULT_VALUES.put(char.class, '\0');
+		PRIMITIVES_DEFAULT_VALUES.put(double.class, 0.0);
+		PRIMITIVES_DEFAULT_VALUES.put(float.class, 0.0f);
+		PRIMITIVES_DEFAULT_VALUES.put(int.class, 0);
+		PRIMITIVES_DEFAULT_VALUES.put(long.class, 0L);
+		PRIMITIVES_DEFAULT_VALUES.put(short.class, 0);
+		PRIMITIVES_DEFAULT_VALUES.put(void.class, null);
+	}
+	
+	private Map <Method, Map<ArgumentsPack, Object>> map = new HashMap<>();
+	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
 			return this;
-		String mName = method.getName();
-		//Check if the return type is void.
-		boolean returnVoid = false;
-		if (method.getReturnType() == void.class)
-			returnVoid = true;
-		System.out.println(returnVoid);
-		if (map.containsKey(mName)) {
-			//A dictionary connects the args and the return val;
-			Map dict = map.get(mName);
-			//A tricky way to check if the arguments are a match.
-			Set <Object[]> keys = dict.keySet();
-			for (Object[] key : keys) {
-				if (key.length != args.length)
-					continue;
-				boolean isMatch = true;
-				for (int i = 0; i < args.length; i++)
-					if (!key[i].equals(args[i])) {
-						isMatch = false;
-						break;
-					}
-				if (isMatch) {
-					if (returnVoid) {
-						System.out.println(dict.get(key));
-						return null;
-					}
-					else
-						return dict.get(key);
-				}
-			}
-				
+		
+		ArgumentsPack argsPack = new ArgumentsPack(args);
+		Class<?> retType = method.getReturnType();
+		
+		//Store this invocation information
+		LastInvocation.addInvocation(proxy, method, argsPack);
+		
+		//If we can find information for this method invocation, we return the predefined value
+		if(map.containsKey(method) && map.get(method).containsKey(argsPack)){
+			Object res = map.get(method).get(argsPack);
+			if(retType.equals(void.class)){
+				System.out.println(res);
+				return null;
+			}else
+				return res; 
 		}
-		return null;
+			
+		//Otherwise, return a default value
+		if(retType.isPrimitive())
+			return PRIMITIVES_DEFAULT_VALUES.get(retType);
+		else
+			return null;
 	}
 	
 	/**
 	 * Add the new correlation between method and return val to the map.
-	 * @param m: target method; args: parameters of the method; ret: return value.
+	 * @param m target method; 
+	 * @param args parameters of the method; 
+	 * @param ret return value.
 	 * @return if the operation is successful.
 	 */
-	public boolean add(String m, Object[] args, Object ret) {
-		if (map.containsKey(m)) {
-			Map dict = map.get(m);
-			if (dict.containsKey(args)) 
-				return false;
-			else
-				dict.put(args, ret);
-		} else {
-			Map<Object[], Object> dict = new HashMap<>();
-			dict.put(args, ret);
+	public boolean add(Method m, ArgumentsPack args, Object ret) {
+		Map<ArgumentsPack, Object> dict = map.get(m);
+		if(dict == null){
+			dict = new HashMap<>();
 			map.put(m, dict);
 		}
+		dict.put(args, ret);
 		return true;
 	}
 

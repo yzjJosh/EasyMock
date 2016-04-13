@@ -1,6 +1,9 @@
 package exceptions;
 
-public class IlegalTypeException extends Exception {
+public class IlegalTypeException extends RuntimeException {
+
+	private static final long serialVersionUID = 1L;
+	
 	public IlegalTypeException(String message) {
 		super(message);
 	}
