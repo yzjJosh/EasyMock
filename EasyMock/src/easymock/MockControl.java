@@ -20,5 +20,11 @@ public class MockControl<T> {
 		handler.add(method.getName(), arguments, val);
 		return this;
 	}
+	
+	//currently used for void func
+	public MockControl addPrint(String msg) {
+		handler.add(method.getName(), arguments, msg);
+		return this;
+	}
 
 }

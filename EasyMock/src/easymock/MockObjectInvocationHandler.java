@@ -15,7 +15,11 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
 			return this;
 		String mName = method.getName();
-		
+		//Check if the return type is void.
+		boolean returnVoid = false;
+		if (method.getReturnType() == void.class)
+			returnVoid = true;
+		System.out.println(returnVoid);
 		if (map.containsKey(mName)) {
 			//A dictionary connects the args and the return val;
 			Map dict = map.get(mName);
@@ -30,7 +34,14 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 						isMatch = false;
 						break;
 					}
-				if (isMatch) return dict.get(key);
+				if (isMatch) {
+					if (returnVoid) {
+						System.out.println(dict.get(key));
+						return null;
+					}
+					else
+						return dict.get(key);
+				}
 			}
 				
 		}

@@ -29,7 +29,7 @@ public class EasyMock {
 	public static<T> MockControl expect(Object proxy, String mName, Object[] args) {
 		try {
 			if (!(proxy instanceof HandlerHelper)) {
-				throw new IlegalTypeException();
+				throw new IlegalTypeException("Cannot get the handler!");
 			}
 			Class[] classes = new Class[args.length];
 			for (int i = 0; i < args.length; i++)
@@ -55,6 +55,7 @@ public class EasyMock {
 	//Following is an example
 	interface Foo{
 		int doit(String s, Integer i);
+		void foo(String s);
 	}
 	
 	public static void main(String[] args){
@@ -63,6 +64,8 @@ public class EasyMock {
 		System.out.println(handler);
 		expect(f, "doit", new Object[]{"sss", 4}).addReturn(7);
 		System.out.println(f.doit("sss", 4));
+		expect(f, "foo", new Object[]{"fooooo"}).addPrint("i am foooo!");
+		f.foo("fooooo");
 	}
 	
 }
