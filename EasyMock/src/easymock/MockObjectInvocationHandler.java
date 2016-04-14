@@ -41,6 +41,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 			Exception exception = (Exception) res[1];
 			//Firstly, handle the exception
 			if (exception != null) {
+				System.out.println(exception.getMessage());
 				throw exception;
 			}
 			if(retType.equals(void.class)){

@@ -2,6 +2,8 @@ package easymock;
 
 import java.lang.reflect.Proxy;
 
+import exceptions.CustomedException;
+
 public class EasyMock {
 	
 	/**
@@ -57,6 +59,7 @@ public class EasyMock {
 	interface Foo{
 		int doit(String s, Integer i);
 		void foo(String s);
+		int doit2(String s);
 	}
 	
 	public static void main(String[] args){
@@ -70,6 +73,9 @@ public class EasyMock {
 		f.foo("fooooo");
 		expectLastCall().addPrint("i am foooo!");
 		f.foo("fooooo");
+		
+		expect(f.doit2("sss")).addException(new CustomedException("Test!"));
+		f.doit2("sss");
 	}
 	
 }
