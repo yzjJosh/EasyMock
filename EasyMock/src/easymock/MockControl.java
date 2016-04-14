@@ -60,8 +60,25 @@ public class MockControl {
 		return voidController;
 	}
 	
-	class Control <T> {
+	@SuppressWarnings("unchecked")
+	class Control <T> {	
+		
+		/**
+		 * Specify the exception for controlled method
+		 * @param e the exception to be thrown
+		 * @return this controller
+		 * @throws IllegalTypeException If the exception added is not declared by the method
+		 */
 		public T addException(Exception e) {
+			Class<?>[] exceptions = method.getExceptionTypes();
+			boolean match = false;
+			for(Class<?> eType: exceptions)
+				if(eType.isInstance(e)){
+					match = true;
+					break;
+				}
+			if(!match)
+				throw new IllegalTypeException("Cannot add an undecleared exception to the method!");
 			handler.addException(method, arguments, e);
 			return (T) this;
 		}

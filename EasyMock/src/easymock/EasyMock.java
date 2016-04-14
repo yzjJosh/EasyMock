@@ -78,7 +78,10 @@ public class EasyMock {
 			f.doit2("sss");
 		} catch(Exception e) {
 //			e.getMessage();
+			e.printStackTrace();
 		}
+		
+		expect(f.doit("ss", 0)).addException(new NullPointerException());
 	}
 	
 }

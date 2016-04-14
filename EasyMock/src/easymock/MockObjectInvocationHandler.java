@@ -44,7 +44,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 				System.out.println(exception.getMessage());
 				throw exception;
 			}
-			if(retType.equals(void.class)){
+			if(retType == void.class || retType == Void.class){
 				System.out.println(ret);
 				return null;
 			}else
