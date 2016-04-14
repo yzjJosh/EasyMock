@@ -21,7 +21,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		PRIMITIVES_DEFAULT_VALUES.put(void.class, null);
 	}
 	
-	private Map <Method, Map<ArgumentsPack, Object>> map = new HashMap<>();
+	private Map <Method, Map<ArgumentsPack, Object[]>> map = new HashMap<>();
 	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -36,12 +36,13 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		
 		//If we can find information for this method invocation, we return the predefined value
 		if(map.containsKey(method) && map.get(method).containsKey(argsPack)){
-			Object res = map.get(method).get(argsPack);
+			Object[] res = map.get(method).get(argsPack);
+			Object ret = res[0];
 			if(retType.equals(void.class)){
-				System.out.println(res);
+				System.out.println(ret);
 				return null;
 			}else
-				return res; 
+				return ret; 
 		}
 			
 		//Otherwise, return a default value
@@ -59,12 +60,16 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * @return if the operation is successful.
 	 */
 	public boolean add(Method m, ArgumentsPack args, Object ret) {
-		Map<ArgumentsPack, Object> dict = map.get(m);
+		Map<ArgumentsPack, Object[]> dict = map.get(m);
 		if(dict == null){
 			dict = new HashMap<>();
 			map.put(m, dict);
 		}
-		dict.put(args, ret);
+		Object[] bundles = dict.get(args);
+		if (bundles == null) 
+			bundles = new Object[3];
+		bundles[0] = ret;
+		dict.put(args, bundles);
 		return true;
 	}
 

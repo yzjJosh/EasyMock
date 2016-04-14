@@ -60,7 +60,12 @@ public class MockControl {
 		return voidController;
 	}
 	
-	class ControlReturn{
+	class Control <T> {
+//		public T addException(Exception e) {
+//			
+//		}
+	}
+	class ControlReturn extends Control <ControlReturn> {
 		
 		Class<?> returnType(){
 			return method.getReturnType();
@@ -86,7 +91,7 @@ public class MockControl {
 		}
 	}
 	
-	class ControlVoid{
+	class ControlVoid extends Control <ControlVoid> {
 		
 		/**
 		 * Specify the print string for controlled method
@@ -98,5 +103,6 @@ public class MockControl {
 			return this;
 		}
 	}
+	
 
 }
