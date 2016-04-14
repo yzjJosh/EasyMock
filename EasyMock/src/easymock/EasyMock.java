@@ -59,7 +59,7 @@ public class EasyMock {
 	interface Foo{
 		int doit(String s, Integer i);
 		void foo(String s);
-		int doit2(String s);
+		int doit2(String s) throws CustomedException;
 	}
 	
 	public static void main(String[] args){
@@ -73,9 +73,12 @@ public class EasyMock {
 		f.foo("fooooo");
 		expectLastCall().addPrint("i am foooo!");
 		f.foo("fooooo");
-		
+		try {
 		expect(f.doit2("sss")).addException(new CustomedException("Test!"));
-		f.doit2("sss");
+			f.doit2("sss");
+		} catch(Exception e) {
+//			e.getMessage();
+		}
 	}
 	
 }

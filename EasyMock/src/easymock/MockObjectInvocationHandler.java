@@ -87,6 +87,10 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * @return if the operation is successful.
 	 */
 	public boolean addException(Method m, ArgumentsPack args, Exception e) {
+		if (m.getExceptionTypes() == null) {
+			System.out.println("The method doesn't throw an exception!");
+			return false;
+		}
 		Map<ArgumentsPack, Object[]> dict = map.get(m);
 		if(dict == null){
 			dict = new HashMap<>();
