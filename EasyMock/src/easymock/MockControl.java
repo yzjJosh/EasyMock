@@ -61,9 +61,10 @@ public class MockControl {
 	}
 	
 	class Control <T> {
-//		public T addException(Exception e) {
-//			
-//		}
+		public T addException(Exception e) {
+			handler.addException(method, arguments, e);
+			return (T)this;
+		}
 	}
 	class ControlReturn extends Control <ControlReturn> {
 		

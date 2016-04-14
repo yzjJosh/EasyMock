@@ -38,6 +38,11 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		if(map.containsKey(method) && map.get(method).containsKey(argsPack)){
 			Object[] res = map.get(method).get(argsPack);
 			Object ret = res[0];
+			Exception exception = (Exception) res[1];
+			//Firstly, handle the exception
+			if (exception != null) {
+				throw exception;
+			}
 			if(retType.equals(void.class)){
 				System.out.println(ret);
 				return null;
@@ -69,6 +74,27 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		if (bundles == null) 
 			bundles = new Object[3];
 		bundles[0] = ret;
+		dict.put(args, bundles);
+		return true;
+	}
+	
+	/**
+	 * Add the new correlation between method and return val to the map.
+	 * @param m target method; 
+	 * @param args parameters of the method; 
+	 * @param ret return value.
+	 * @return if the operation is successful.
+	 */
+	public boolean addException(Method m, ArgumentsPack args, Exception e) {
+		Map<ArgumentsPack, Object[]> dict = map.get(m);
+		if(dict == null){
+			dict = new HashMap<>();
+			map.put(m, dict);
+		}
+		Object[] bundles = dict.get(args);
+		if (bundles == null) 
+			bundles = new Object[3];
+		bundles[1] = e;
 		dict.put(args, bundles);
 		return true;
 	}
