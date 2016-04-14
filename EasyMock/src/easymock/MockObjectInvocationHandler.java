@@ -79,7 +79,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	}
 	
 	/**
-	 * Add the new correlation between method and return val to the map.
+	 * Add the new correlation between method and exception to the map.
 	 * @param m target method; 
 	 * @param args parameters of the method; 
 	 * @param ret return value.
