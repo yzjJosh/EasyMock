@@ -77,7 +77,6 @@ public class EasyMock {
 		expect(f.doit2("sss")).addException(new CustomedException("Test!"));
 			f.doit2("sss");
 		} catch(Exception e) {
-//			e.getMessage();
 			e.printStackTrace();
 		}
 		
