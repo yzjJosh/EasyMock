@@ -6,7 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MockObjectInvocationHandler implements InvocationHandler{
-
+	public static enum State {
+		RECORD, REPLAY, VERIFY
+	};
+	
+	private State state = State.RECORD; 
 	private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_VALUES = new HashMap<>();
 	
 	static{
@@ -28,6 +32,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
 			return this;
 		
+		if (state != State.REPLAY) throw new IllegalStateException(" Missing behavior definition for the preceding method call! ");
 		ArgumentsPack argsPack = new ArgumentsPack(args);
 		Class<?> retType = method.getReturnType();
 		
@@ -102,6 +107,14 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		bundles[1] = e;
 		dict.put(args, bundles);
 		return true;
+	}
+	
+	/**
+	 * Change the state of the current handler
+	 * @param s the new state
+	 */
+	public void setState(State s) {
+		this.state = s;
 	}
 
 }

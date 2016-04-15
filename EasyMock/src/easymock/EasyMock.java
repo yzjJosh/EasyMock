@@ -53,6 +53,15 @@ public class EasyMock {
 		return control.controlVoid();
 	}
 	
+	/**
+	 * Change the state of the mocking object to REPLAY.
+	 * @param o the mocking object.
+	 */
+	public static void replay(Object o) {
+		MockObjectInvocationHandler handler = ((HandlerHelper)o).getHandler();
+		handler.setState(MockObjectInvocationHandler.State.REPLAY);
+	}
+	
 	
 	
 	//Following is an example
@@ -64,7 +73,7 @@ public class EasyMock {
 	
 	public static void main(String[] args){
 		Foo f = (Foo) createMock(Foo.class);
-		
+		replay(f);
 		expect(f.doit("sss", 4)).addReturn(7);
 		expect(f.doit(null, 0)).addReturn(0);
 		System.out.println(f.doit("sss", 4));
@@ -79,8 +88,11 @@ public class EasyMock {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+		try {
 		expect(f.doit("ss", 0)).addException(new NullPointerException());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
