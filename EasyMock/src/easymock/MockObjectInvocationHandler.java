@@ -2,15 +2,31 @@ package easymock;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MockObjectInvocationHandler implements InvocationHandler{
 	public static enum State {
-		RECORD, REPLAY, VERIFY
+		RECORD, REPLAY
 	};
 	
-	private State state = State.RECORD; 
+	/**
+	 * Bundle which binds a method, its arguments, and its behavior together
+	 *
+	 */
+	private static class InvocationDefinition{
+		public final Method method;
+		public final ArgumentsPack args;
+		public final Behavior behavior;
+		
+		public InvocationDefinition(Method method, ArgumentsPack args, Behavior behavior){
+			if(method == null || args == null || behavior == null)
+				throw new NullPointerException();
+			this.method = method;
+			this.args = args;
+			this.behavior = behavior;
+		}
+	}
+	
 	private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_VALUES = new HashMap<>();
 	
 	static{
@@ -25,38 +41,40 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		PRIMITIVES_DEFAULT_VALUES.put(void.class, null);
 	}
 	
-	private Map <Method, Map<ArgumentsPack, Object[]>> map = new HashMap<>();
+	private ArrayList<InvocationDefinition> queue = new ArrayList<>();
+	private int curIndex = 0;
+	private State state = State.RECORD; 
 	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
 			return this;
 		
-		if (state != State.REPLAY) throw new IllegalStateException(" Missing behavior definition for the preceding method call! ");
 		ArgumentsPack argsPack = new ArgumentsPack(args);
 		Class<?> retType = method.getReturnType();
 		
 		//Store this invocation information
 		LastInvocation.addInvocation(proxy, method, argsPack);
 		
-		//If we can find information for this method invocation, we return the predefined value
-		if(map.containsKey(method) && map.get(method).containsKey(argsPack)){
-			Object[] res = map.get(method).get(argsPack);
-			Object ret = res[0];
-			Exception exception = (Exception) res[1];
-			//Firstly, handle the exception
-			if (exception != null) {
-				System.out.println(exception.getMessage());
-				throw exception;
+		//If we are replaying this mock object
+		if(state == State.REPLAY){
+			//If the behavior is defined for this invocation, we behave as defined.
+			if(curIndex < queue.size()){
+				InvocationDefinition invocation = queue.get(curIndex);
+				if(invocation.method.equals(method) && invocation.args.equals(argsPack)&&
+					(retType == void.class || retType == Void.class || 
+					invocation.behavior.hasThrowable() || invocation.behavior.hasReturnValue())){
+					curIndex ++;
+					return invocation.behavior.behave();
+				}
 			}
-			if(retType == void.class || retType == Void.class){
-				System.out.println(ret);
-				return null;
-			}else
-				return ret; 
+			
+			//Otherwise, we throw an exception
+			throw new IllegalStateException(" Missing behavior definition for the method \""+method+
+					"\" with arguments \""+Arrays.toString(args)+"\"");		
 		}
 			
-		//Otherwise, return a default value
+		//If we are not replaying, return a default value
 		if(retType.isPrimitive())
 			return PRIMITIVES_DEFAULT_VALUES.get(retType);
 		else
@@ -64,57 +82,41 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	}
 	
 	/**
-	 * Add the new correlation between method and return val to the map.
-	 * @param m target method; 
-	 * @param args parameters of the method; 
-	 * @param ret return value.
-	 * @return if the operation is successful.
+	 * Add an invocation of a method, define its behavior
+	 * @param method the method to be added
+	 * @param args the arguments of the method
+	 * @param behavior the behavior of this invocation
+	 * @throws IllegalStateException if is not in record state
 	 */
-	public boolean add(Method m, ArgumentsPack args, Object ret) {
-		Map<ArgumentsPack, Object[]> dict = map.get(m);
-		if(dict == null){
-			dict = new HashMap<>();
-			map.put(m, dict);
-		}
-		Object[] bundles = dict.get(args);
-		if (bundles == null) 
-			bundles = new Object[3];
-		bundles[0] = ret;
-		dict.put(args, bundles);
-		return true;
+	void addInvocation(Method method, ArgumentsPack args, Behavior behavior){
+		if(state != State.RECORD)
+			throw new IllegalStateException("Not in record state!");
+		queue.add(new InvocationDefinition(method, args, behavior));
+	}
+	
+	
+	/**
+	 * Start recording. This method will clear previously defined behaviors.
+	 */
+	void record(){
+		queue = new ArrayList<InvocationDefinition>();
+		state = State.RECORD;
 	}
 	
 	/**
-	 * Add the new correlation between method and exception to the map.
-	 * @param m target method; 
-	 * @param args parameters of the method; 
-	 * @param ret return value.
-	 * @return if the operation is successful.
+	 * Start playing. This method will make this object start playing from the beginning.
 	 */
-	public boolean addException(Method m, ArgumentsPack args, Exception e) {
-		if (m.getExceptionTypes() == null) {
-			System.out.println("The method doesn't throw an exception!");
-			return false;
-		}
-		Map<ArgumentsPack, Object[]> dict = map.get(m);
-		if(dict == null){
-			dict = new HashMap<>();
-			map.put(m, dict);
-		}
-		Object[] bundles = dict.get(args);
-		if (bundles == null) 
-			bundles = new Object[3];
-		bundles[1] = e;
-		dict.put(args, bundles);
-		return true;
+	void replay(){
+		curIndex = 0;
+		state = State.REPLAY;
 	}
 	
 	/**
-	 * Change the state of the current handler
-	 * @param s the new state
+	 * Get the current state of this mock object
+	 * @return the current state
 	 */
-	public void setState(State s) {
-		this.state = s;
+	State getState(){
+		return state;
 	}
 
 }

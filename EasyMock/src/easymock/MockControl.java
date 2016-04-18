@@ -3,6 +3,7 @@ package easymock;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import easymock.MockObjectInvocationHandler.State;
 import exceptions.IllegalTypeException;
 
 public class MockControl {
@@ -24,9 +25,8 @@ public class MockControl {
 	private final MockObjectInvocationHandler handler;
 	private final Method method;
 	private final ArgumentsPack arguments;
+	private final Behavior behavior;
 	
-	private final ControlReturn returnController;
-	private final ControlVoid voidController;
 	
 	MockControl(Object proxy, Method m, ArgumentsPack args) {
 		if(proxy == null || m == null || args == null)
@@ -34,56 +34,94 @@ public class MockControl {
 		this.handler = ((HandlerHelper)proxy).getHandler();
 		this.method = m;
 		this.arguments = args;
-		this.returnController = new ControlReturn();
-		this.voidController = new ControlVoid();
+		this.behavior = new Behavior();
+		handler.addInvocation(method, arguments, behavior);
 	}
 	
 	/**
 	 * Get the return controller for this controlled method
 	 * @return the return controller
 	 * @throws IllegalTypeException if the return type of the controlled method is void
+	 * @throws IllegalStateException if the mock object is not in record state
 	 */
 	public ControlReturn controlReturn(){
-		if(method.getReturnType() == void.class || method.getReturnType() == Void.class)
-			throw new IllegalTypeException("Cannot get return controller for a void returned method");
-		return returnController;
+		if(handler.getState() != State.RECORD)
+			throw new IllegalStateException("Not in record state!");
+		return new ControlReturn();
 	}
 	
 	/**
 	 * Get the void controller for this controlled method
 	 * @return the return controller
 	 * @throws IllegalTypeException if the return type of the controlled method is not void
+	 * @throws IllegalStateException if the mock object is not in record state
 	 */
 	public ControlVoid controlVoid(){
-		if(method.getReturnType() != void.class && method.getReturnType() != Void.class)
-			throw new IllegalTypeException("Cannot get void controller for a non-void returned method");
-		return voidController;
+		if(handler.getState() != State.RECORD)
+			throw new IllegalStateException("Not in record state!");
+		return new ControlVoid();
 	}
 	
+	/**
+	 * Base class of all controllers
+	 * @param <T> the actual subclass type
+	 */
 	@SuppressWarnings("unchecked")
-	class Control <T> {	
+	private abstract class Control <T> {	
 		
 		/**
-		 * Specify the exception for controlled method
-		 * @param e the exception to be thrown
+		 * Specify the throwable to be thrown for controlled method
+		 * @param t the throwable object to be thrown
 		 * @return this controller
-		 * @throws IllegalTypeException If the exception added is not declared by the method
+		 * @throws IllegalTypeException If the throwable added is a exception that is not declared by the method
+		 * @throws NullPointerException If the exception added is a null pointer
+		 * @throws IllegalStateException if the mock object is not in record state
 		 */
-		public T addException(Exception e) {
-			Class<?>[] exceptions = method.getExceptionTypes();
-			boolean match = false;
-			for(Class<?> eType: exceptions)
-				if(eType.isInstance(e)){
-					match = true;
-					break;
-				}
-			if(!match)
-				throw new IllegalTypeException("Cannot add an undecleared exception to the method!");
-			handler.addException(method, arguments, e);
+		public T setThrowable(Throwable t) {
+			if(handler.getState() != State.RECORD)
+				throw new IllegalStateException("Not in record state!");
+			if(t == null)
+				throw new NullPointerException("Cannot throw a null pointer!");
+			if(!(t instanceof RuntimeException) && !(t instanceof Error)){
+				Class<?>[] exceptions = method.getExceptionTypes();
+				boolean match = false;
+				for(Class<?> eType: exceptions)
+					if(eType.isInstance(t)){
+						match = true;
+						break;
+					}
+				if(!match)
+					throw new IllegalTypeException("Cannot add an undecleared exception to the method!");
+			}
+			behavior.setThrowable(t);
 			return (T) this;
 		}
+		
+		/**
+		 * Specify the print string for controlled method
+		 * @param msg the string to be printed
+		 * @return this controller
+		 * @throws IllegalStateException if the mock object is not in record state
+		 */
+		public T setPrint(String msg) {
+			if(handler.getState() != State.RECORD)
+				throw new IllegalStateException("Not in record state!");
+			behavior.setPrint(msg);
+			return (T)this;
+		}
 	}
-	class ControlReturn extends Control <ControlReturn> {
+	
+	
+	/**
+	 * Controller which controls the behavior of a method with a return value
+	 *
+	 */
+	 class ControlReturn extends Control <ControlReturn> {
+		 
+		 public ControlReturn(){
+				if(method.getReturnType() == void.class || method.getReturnType() == Void.class)
+					throw new IllegalTypeException("Cannot get return controller for a void returned method");
+		 }
 		
 		Class<?> returnType(){
 			return method.getReturnType();
@@ -94,8 +132,11 @@ public class MockControl {
 		 * @param val the return value
 		 * @return this controller
 		 * @throws IllegalTypeException if the specified value has a wrong type
+		 * @throws IllegalStateException if the mock object is not in record state
 		 */
-		public ControlReturn addReturn(Object val) {
+		public ControlReturn setReturn(Object val) {
+			if(handler.getState() != State.RECORD)
+				throw new IllegalStateException("Not in record state!");
 			Class<?> retType = returnType();
 			if(retType.isPrimitive()){
 				if(val == null)
@@ -104,21 +145,20 @@ public class MockControl {
 					throw new IllegalTypeException("Return type is wrong!");
 			} else if(val != null && !retType.isInstance(val))
 				throw new IllegalTypeException("Return type is wrong!");
-			handler.add(method, arguments, val);
+			behavior.setReturn(val);
 			return this;
 		}
 	}
 	
+	
+	/**
+	 * Controller which controls the behavior of a method without a return value
+	 *
+	 */
 	class ControlVoid extends Control <ControlVoid> {
-		
-		/**
-		 * Specify the print string for controlled method
-		 * @param msg the string to be printed
-		 * @return this controller
-		 */
-		public ControlVoid addPrint(String msg) {
-			handler.add(method, arguments, msg);
-			return this;
+		public ControlVoid(){
+			if(method.getReturnType() != void.class && method.getReturnType() != Void.class)
+				throw new IllegalTypeException("Cannot get void controller for a non-void returned method");
 		}
 	}
 	

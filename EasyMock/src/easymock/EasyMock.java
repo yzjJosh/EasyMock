@@ -3,6 +3,7 @@ package easymock;
 import java.lang.reflect.Proxy;
 
 import exceptions.CustomedException;
+import exceptions.IllegalTypeException;
 
 public class EasyMock {
 	
@@ -20,6 +21,7 @@ public class EasyMock {
 	/**
 	 * Get MockControl for last invoked method
 	 * @return the MockControl object
+	 * @throws IllegalStateException if the mock object of last called method is not in record state
 	 */
 	private static MockControl controlLastCalledMethod(){
 		LastInvocation lastInvocation = LastInvocation.getLastInvocation();
@@ -30,7 +32,7 @@ public class EasyMock {
 	/**
 	 * Specify the expected behavior for the last called method. This method works only for method which has a return value.
 	 *	@return the controller
-	 * @throws IllegalStateException if no method can be controlled
+	 * @throws IllegalStateException if no method can be controlled or the mock object of last called method is not in record state
 	 * @throws IllegalTypeException if the last called method has void return type
 	 */
 	public static<T> MockControl.ControlReturn expect(T value) {
@@ -43,7 +45,7 @@ public class EasyMock {
 	/**
 	 * Specify the expected behavior for the last called method. This method works only for method which has no return value.
 	 * @return the controller
-	 * @throws IllegalStateException if no method can be controlled
+	 * @throws IllegalStateException if no method can be controlled  or the mock object of last called method is not in record state
 	 * @throws IllegalTypeException if the last called method has a non-void return type
 	 */
 	public static MockControl.ControlVoid expectLastCall(){
@@ -55,11 +57,26 @@ public class EasyMock {
 	
 	/**
 	 * Change the state of the mocking object to REPLAY.
-	 * @param o the mocking object.
+	 * @param o the mock object.
+	 * @throws IllegalTypeException if the object is not a mock object
 	 */
 	public static void replay(Object o) {
+		if(!(o instanceof HandlerHelper))
+			throw new IllegalTypeException("Not a mock object!");
 		MockObjectInvocationHandler handler = ((HandlerHelper)o).getHandler();
-		handler.setState(MockObjectInvocationHandler.State.REPLAY);
+		handler.replay();
+	}
+	
+	/**
+	 * Change the state of the mocking object to RECORD.
+	 * @param o the mock object.
+	 * @throws IllegalTypeException if the object is not a mock object
+	 */
+	public static void record(Object o){
+		if(!(o instanceof HandlerHelper))
+			throw new IllegalTypeException("Not a mock object!");
+		MockObjectInvocationHandler handler = ((HandlerHelper)o).getHandler();
+		handler.record();
 	}
 	
 	
@@ -73,24 +90,33 @@ public class EasyMock {
 	
 	public static void main(String[] args){
 		Foo f = (Foo) createMock(Foo.class);
-		replay(f);
-		expect(f.doit("sss", 4)).addReturn(7);
-		expect(f.doit(null, 0)).addReturn(0);
-		System.out.println(f.doit("sss", 4));
-		System.out.println(f.doit(null, 0));
 		
+		record(f);
+		
+		expect(f.doit("sss", 4)).setReturn(7).setPrint("hello!");
+		expect(f.doit(null, 0)).setReturn(0).setPrint("haha!");	
 		f.foo("fooooo");
-		expectLastCall().addPrint("i am foooo!");
-		f.foo("fooooo");
+		expectLastCall().setPrint("i am foooo!");
 		try {
-		expect(f.doit2("sss")).addException(new CustomedException("Test!"));
-			f.doit2("sss");
+			expect(f.doit2("sss")).setThrowable(new CustomedException("Test!"));
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		expect(f.doit("ss", 0)).setThrowable(new NullPointerException()).setPrint(null);
+		
+		replay(f);
+		
+		System.out.println(f.doit("sss", 4));
+		System.out.println(f.doit(null, 0));
+		f.foo("fooooo");
 		try {
-		expect(f.doit("ss", 0)).addException(new NullPointerException());
-		} catch(Exception e) {
+			f.doit2("sss");
+		} catch (CustomedException e) {
+			e.printStackTrace();
+		}
+		try{
+			f.doit("ss", 0);
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
