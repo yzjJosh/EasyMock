@@ -3,6 +3,9 @@ package easymock;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import tree.TreeNode;
+
 import tree.Tree;
 
 
@@ -26,10 +29,11 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		PRIMITIVES_DEFAULT_VALUES.put(void.class, null);
 	}
 	
-	private ArrayList<InvocationDefinition> queue = new ArrayList<>();
 	private Tree<InvocationDefinition> tree = new Tree<>();
 	private int curIndex = 0;
 	private State state = State.RECORD; 
+	private boolean inBranch = false;
+	private TreeNode<InvocationDefinition> curParent;
 	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -45,13 +49,42 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		//If we are replaying this mock object
 		if(state == State.REPLAY){
 			//If the behavior is defined for this invocation, we behave as defined.
-			if(curIndex < queue.size()){
-				InvocationDefinition invocation = queue.get(curIndex);
-				if(invocation.method.equals(method) && invocation.args.equals(argsPack)&&
-					(retType == void.class || retType == Void.class || 
-					invocation.behavior.hasThrowable() || invocation.behavior.hasReturnValue())){
-					curIndex ++;
-					return invocation.behavior.behave();
+			if (curIndex < tree.size()) {
+				while (tree.getNode(curIndex).isDummy()) {
+					curIndex++;
+					inBranch = false;
+					if (curIndex >= tree.size())
+						throw new IllegalStateException(" Missing behavior definition for the method \"" + method
+								+ "\" with arguments \"" + Arrays.toString(args) + "\"");
+				}
+				//Currently the execution is not in a branch
+				if (!inBranch) {
+					TreeNode<InvocationDefinition> node = tree.getNode(curIndex);
+					InvocationDefinition invocation = node.getVal();
+					if (invocation.method.equals(method) && invocation.args.equals(argsPack)
+							&& (retType == void.class || retType == Void.class || invocation.behavior.hasThrowable()
+									|| invocation.behavior.hasReturnValue())) {
+						curIndex = node.getSeq() + 1;
+						if (node.getNumOfChildren() > 1) {
+							curParent = node;
+							inBranch = true;
+						}
+						return invocation.behavior.behave();
+					}
+				} else {    //In a branch
+					for (TreeNode<InvocationDefinition> node : curParent.getChildren()) {
+						InvocationDefinition invocation = node.getVal();
+						if (invocation.method.equals(method) && invocation.args.equals(argsPack)
+								&& (retType == void.class || retType == Void.class || invocation.behavior.hasThrowable()
+										|| invocation.behavior.hasReturnValue())) {
+							curIndex = node.getSeq() + 1;
+							if (node.getNumOfChildren() > 1) {
+								curParent = node;
+								inBranch = true;
+							}
+							return invocation.behavior.behave();
+						}
+					}
 				}
 			}
 			
@@ -77,7 +110,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	void addInvocation(Method method, ArgumentsPack args, Behavior behavior){
 		if(state != State.RECORD)
 			throw new IllegalStateException("Not in record state!");
-		queue.add(new InvocationDefinition(method, args, behavior));
+		tree.addNode(new InvocationDefinition(method, args, behavior));
 	}
 	
 	
@@ -85,7 +118,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * Start recording. This method will clear previously defined behaviors.
 	 */
 	void record(){
-		queue = new ArrayList<InvocationDefinition>();
+		tree = new Tree<>();
 		state = State.RECORD;
 	}
 	
