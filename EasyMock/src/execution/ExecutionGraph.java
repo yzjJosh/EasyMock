@@ -46,7 +46,7 @@ public class ExecutionGraph {
 		return null;
 	}
 	
-	static class Builder{
+	public static class Builder{
 		
 		private final Graph<InvocationDefinition> graph;
 		private final Stack<Integer> switchPoints;

@@ -79,6 +79,44 @@ public class EasyMock {
 		handler.record();
 	}
 	
+	/**
+	 * Create the branch
+	 * @param o the mock object.
+	 * @throws IllegalTypeException if the object is not a mock object
+	 */
+	public static void startBranch(Object o) {
+		if(!(o instanceof HandlerHelper))
+			throw new IllegalTypeException("Not a mock object!");
+		MockObjectInvocationHandler handler = ((HandlerHelper)o).getHandler();
+		handler.startBranch();
+	}
+	
+	/**
+	 * Switch the branch
+	 * @param o the mock object.
+	 * @throws IllegalTypeException if the object is not a mock object
+	 */
+	public static void switchBranch(Object o) {
+		if(!(o instanceof HandlerHelper))
+			throw new IllegalTypeException("Not a mock object!");
+		MockObjectInvocationHandler handler = ((HandlerHelper)o).getHandler();
+		handler.switchBranch();
+	}
+	
+	/**
+	 * End the branch
+	 * @param o the mock object.
+	 * @throws IllegalTypeException if the object is not a mock object
+	 */
+	public static void endBranch(Object o) {
+		if(!(o instanceof HandlerHelper))
+			throw new IllegalTypeException("Not a mock object!");
+		MockObjectInvocationHandler handler = ((HandlerHelper)o).getHandler();
+		handler.endBranch();
+	}
+	
+	
+	
 	
 	
 	//Following is an example

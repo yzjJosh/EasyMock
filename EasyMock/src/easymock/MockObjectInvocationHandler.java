@@ -4,9 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import execution.ArgumentsPack;
-import execution.Behavior;
-import execution.InvocationDefinition;
+import execution.*;
 
 
 public class MockObjectInvocationHandler implements InvocationHandler{
@@ -28,12 +26,11 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		DEFAULT_RETURN_VALUES.put(short.class, 0);
 	}
 	
-	private DAG<InvocationDefinition> tree = new DAG<>();
-	private int curIndex = 0;
+	private ExecutionGraph.Builder builder = new ExecutionGraph.Builder();
+	private ExecutionGraph graph;
 	private State state = State.RECORD; 
-	private boolean inBranch = false;
-	private TreeNode<InvocationDefinition> curParent;
-	
+
+
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
@@ -46,50 +43,11 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		LastInvocation.addInvocation(proxy, method, argsPack);
 		
 		//If we are replaying this mock object
-		if(state == State.REPLAY){
+		if(state == State.REPLAY) {
 			//If the behavior is defined for this invocation, we behave as defined.
-			if (curIndex < tree.size()) {
-				while (tree.getNode(curIndex).isDummy()) {
-					curIndex++;
-					inBranch = false;
-					if (curIndex >= tree.size())
-						throw new IllegalStateException(" Missing behavior definition for the method \"" + method
-								+ "\" with arguments \"" + Arrays.toString(args) + "\"");
-				}
-				//Currently the execution is not in a branch
-				if (!inBranch) {
-					TreeNode<InvocationDefinition> node = tree.getNode(curIndex);
-					InvocationDefinition invocation = node.getVal();
-					if (invocation.matches(method, argsPack)) {
-						if(invocation.isBehaviorLegal()){
-							curIndex = node.getSeq() + 1;
-							if (node.getNumOfChildren() > 1) {
-								curParent = node;
-								inBranch = true;
-							}
-							return invocation.behavior.behave();
-						}
-						else
-							throw new IllegalStateException(" Missing behavior definition for the method \"" + method
-									+ "\" with arguments \"" + Arrays.toString(args) + "\"");
-					}
-				} else {    //In a branch
-					for (TreeNode<InvocationDefinition> node : curParent.getChildren()) {
-						InvocationDefinition invocation = node.getVal();
-						if (invocation.matches(method, argsPack)){
-							if(invocation.isBehaviorLegal()){
-								curIndex = node.getSeq() + 1;
-								if (node.getNumOfChildren() > 1) {
-									curParent = node;
-									inBranch = true;
-								}
-								return invocation.behavior.behave();
-							}else
-								throw new IllegalStateException(" Missing behavior definition for the method \"" + method
-										+ "\" with arguments \"" + Arrays.toString(args) + "\"");
-						}
-					}
-				}
+			InvocationDefinition invocation = graph.nextIvocation(method, argsPack);
+			if (invocation != null && invocation.isBehaviorLegal()) {
+				return invocation.behavior.behave();
 			}
 			
 			//Otherwise, we throw an exception
@@ -111,7 +69,28 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	void addInvocation(Method method, ArgumentsPack args, Behavior behavior){
 		if(state != State.RECORD)
 			throw new IllegalStateException("Not in record state!");
-		tree.addNode(new InvocationDefinition(method, args, behavior));
+		builder.addInvocation(new InvocationDefinition(method, args, behavior));
+	}
+	
+	/**
+	 * Start branching.
+	 */
+	void startBranch() {
+		builder.startBranch();
+	}
+	
+	/**
+	 * Switch branching.
+	 */
+	void switchBranch() {
+		builder.switchBranch();
+	}
+	
+	/**
+	 * End branching.
+	 */
+	void endBranch() {
+		builder.endBranch();
 	}
 	
 	
@@ -119,7 +98,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * Start recording. This method will clear previously defined behaviors.
 	 */
 	void record(){
-		tree = new DAG<>();
+		builder = new ExecutionGraph.Builder();
 		state = State.RECORD;
 	}
 	
@@ -127,7 +106,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * Start playing. This method will make this object start playing from the beginning.
 	 */
 	void replay(){
-		curIndex = 0;
+		graph = builder.build();
 		state = State.REPLAY;
 	}
 	
