@@ -79,6 +79,10 @@ public class Behavior {
 		return t != null;
 	}
 	
+	/**
+	 * Check if this behavior has a string to print
+	 * @return if it has a string to print or not
+	 */
 	public boolean hasPrintString(){
 		return printString != null;
 	}

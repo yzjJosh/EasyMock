@@ -62,8 +62,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 					TreeNode<InvocationDefinition> node = tree.getNode(curIndex);
 					InvocationDefinition invocation = node.getVal();
 					if (invocation.method.equals(method) && invocation.args.equals(argsPack)
-							&& (retType == void.class || retType == Void.class || invocation.behavior.hasThrowable()
-									|| invocation.behavior.hasReturnValue())) {
+							&& invocation.isBehaviorLegal()) {
 						curIndex = node.getSeq() + 1;
 						if (node.getNumOfChildren() > 1) {
 							curParent = node;
@@ -75,8 +74,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 					for (TreeNode<InvocationDefinition> node : curParent.getChildren()) {
 						InvocationDefinition invocation = node.getVal();
 						if (invocation.method.equals(method) && invocation.args.equals(argsPack)
-								&& (retType == void.class || retType == Void.class || invocation.behavior.hasThrowable()
-										|| invocation.behavior.hasReturnValue())) {
+								&& invocation.isBehaviorLegal()) {
 							curIndex = node.getSeq() + 1;
 							if (node.getNumOfChildren() > 1) {
 								curParent = node;

@@ -2,7 +2,7 @@ package tree;
 import java.util.*;
 
 
-/* 
+/**
  * The flow control tree
  * The tree is used to record the program execution structure.
  */
