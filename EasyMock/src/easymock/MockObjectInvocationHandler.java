@@ -4,9 +4,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import tree.TreeNode;
-
-import tree.Tree;
+import execution.ArgumentsPack;
+import execution.Behavior;
+import execution.InvocationDefinition;
 
 
 public class MockObjectInvocationHandler implements InvocationHandler{
@@ -28,7 +28,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		DEFAULT_RETURN_VALUES.put(short.class, 0);
 	}
 	
-	private Tree<InvocationDefinition> tree = new Tree<>();
+	private DAG<InvocationDefinition> tree = new DAG<>();
 	private int curIndex = 0;
 	private State state = State.RECORD; 
 	private boolean inBranch = false;
@@ -119,7 +119,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * Start recording. This method will clear previously defined behaviors.
 	 */
 	void record(){
-		tree = new Tree<>();
+		tree = new DAG<>();
 		state = State.RECORD;
 	}
 	

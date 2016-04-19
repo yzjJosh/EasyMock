@@ -1,4 +1,4 @@
-package easymock;
+package execution;
 
 /**
  * Behavior defines the behavior of a method

@@ -2,6 +2,8 @@ package easymock;
 
 import java.lang.reflect.Method;
 
+import execution.ArgumentsPack;
+
 /**
  * Last Invocation stores information of the last invoked method
  *

@@ -5,6 +5,8 @@ import java.util.*;
 
 import easymock.MockObjectInvocationHandler.State;
 import exceptions.IllegalTypeException;
+import execution.ArgumentsPack;
+import execution.Behavior;
 
 public class MockControl {
 	

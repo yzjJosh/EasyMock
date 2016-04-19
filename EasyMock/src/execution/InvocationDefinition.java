@@ -1,4 +1,4 @@
-package easymock;
+package execution;
 
 import java.lang.reflect.Method;
 

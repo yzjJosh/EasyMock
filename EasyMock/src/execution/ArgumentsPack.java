@@ -1,4 +1,4 @@
-package easymock;
+package execution;
 
 /**
  * Arguments pack is a wrapper which stores the arguments for a method invocation.
