@@ -3,29 +3,14 @@ package easymock;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
+import tree.Tree;
+
 
 public class MockObjectInvocationHandler implements InvocationHandler{
 	public static enum State {
 		RECORD, REPLAY
 	};
 	
-	/**
-	 * Bundle which binds a method, its arguments, and its behavior together
-	 *
-	 */
-	private static class InvocationDefinition{
-		public final Method method;
-		public final ArgumentsPack args;
-		public final Behavior behavior;
-		
-		public InvocationDefinition(Method method, ArgumentsPack args, Behavior behavior){
-			if(method == null || args == null || behavior == null)
-				throw new NullPointerException();
-			this.method = method;
-			this.args = args;
-			this.behavior = behavior;
-		}
-	}
 	
 	private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_VALUES = new HashMap<>();
 	
@@ -42,6 +27,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	}
 	
 	private ArrayList<InvocationDefinition> queue = new ArrayList<>();
+	private Tree<InvocationDefinition> tree = new Tree<>();
 	private int curIndex = 0;
 	private State state = State.RECORD; 
 	
