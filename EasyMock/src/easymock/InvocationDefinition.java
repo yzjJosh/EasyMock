@@ -3,7 +3,7 @@ package easymock;
 import java.lang.reflect.Method;
 
 /**
- * Bundle which binds a method, its arguments, and its behavior together
+ * Definition of a method invocation, associate a method and its arguments with specified behavior
  *
  */
 public class InvocationDefinition {
@@ -40,5 +40,15 @@ public class InvocationDefinition {
 		if(retType != void.class && retType != Void.class && !behavior.hasThrowable() && !behavior.hasReturnValue())
 			return false;
 		return true;
+	}
+	
+	/**
+	 * Check if a given invocation matches this definition
+	 * @param method the method which is invoked
+	 * @param args the arguments for the invocation
+	 * @return if this definition matches the given invocation
+	 */
+	public boolean matches(Method method, ArgumentsPack args){
+		return this.method.equals(method) && this.args.equals(args);
 	}
 }

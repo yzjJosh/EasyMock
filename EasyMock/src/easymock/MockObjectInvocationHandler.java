@@ -60,26 +60,33 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 				if (!inBranch) {
 					TreeNode<InvocationDefinition> node = tree.getNode(curIndex);
 					InvocationDefinition invocation = node.getVal();
-					if (invocation.method.equals(method) && invocation.args.equals(argsPack)
-							&& invocation.isBehaviorLegal()) {
-						curIndex = node.getSeq() + 1;
-						if (node.getNumOfChildren() > 1) {
-							curParent = node;
-							inBranch = true;
-						}
-						return invocation.behavior.behave();
-					}
-				} else {    //In a branch
-					for (TreeNode<InvocationDefinition> node : curParent.getChildren()) {
-						InvocationDefinition invocation = node.getVal();
-						if (invocation.method.equals(method) && invocation.args.equals(argsPack)
-								&& invocation.isBehaviorLegal()) {
+					if (invocation.matches(method, argsPack)) {
+						if(invocation.isBehaviorLegal()){
 							curIndex = node.getSeq() + 1;
 							if (node.getNumOfChildren() > 1) {
 								curParent = node;
 								inBranch = true;
 							}
 							return invocation.behavior.behave();
+						}
+						else
+							throw new IllegalStateException(" Missing behavior definition for the method \"" + method
+									+ "\" with arguments \"" + Arrays.toString(args) + "\"");
+					}
+				} else {    //In a branch
+					for (TreeNode<InvocationDefinition> node : curParent.getChildren()) {
+						InvocationDefinition invocation = node.getVal();
+						if (invocation.matches(method, argsPack)){
+							if(invocation.isBehaviorLegal()){
+								curIndex = node.getSeq() + 1;
+								if (node.getNumOfChildren() > 1) {
+									curParent = node;
+									inBranch = true;
+								}
+								return invocation.behavior.behave();
+							}else
+								throw new IllegalStateException(" Missing behavior definition for the method \"" + method
+										+ "\" with arguments \"" + Arrays.toString(args) + "\"");
 						}
 					}
 				}
