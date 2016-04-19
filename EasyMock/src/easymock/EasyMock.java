@@ -131,32 +131,26 @@ public class EasyMock {
 		
 		record(f);
 		
-		expect(f.doit("sss", 4)).setReturn(7).setPrint("hello!");
-		expect(f.doit(null, 0)).setReturn(0).setPrint("haha!");	
-		f.foo("fooooo");
-		expectLastCall().setPrint("i am foooo!");
-		try {
-			expect(f.doit2("sss")).setThrowable(new CustomedException("Test!"));
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		expect(f.doit("ss", 0)).setThrowable(new NullPointerException()).setPrint(null);
+		f.foo(null);
+		expectLastCall().setPrint("node 1");
+		startBranch(f);
+			expect(f.doit("  ", 0)).setPrint("node 2").setReturn(0);
+		switchBranch(f);
+			expect(f.doit("  ", 0)).setPrint("node 3").setReturn(0);
+		endBranch(f);
+		f.foo(null);
+		expectLastCall().setPrint("node 4");
 		
 		replay(f);
+		f.foo(null);
+		f.doit("", 0);
+		f.foo(null);
 		
-		System.out.println(f.doit("sss", 4));
-		System.out.println(f.doit(null, 0));
-		f.foo("fooooo");
-		try {
-			f.doit2("sss");
-		} catch (CustomedException e) {
-			e.printStackTrace();
-		}
-		try{
-			f.doit("ss", 0);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		replay(f);
+		f.foo(null);
+		f.doit("  ", 0);
+		f.foo(null);
+		
 	}
 	
 }

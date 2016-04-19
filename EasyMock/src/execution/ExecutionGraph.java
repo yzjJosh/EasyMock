@@ -38,11 +38,22 @@ public class ExecutionGraph {
 	 */
 	public InvocationDefinition nextIvocation(Method method, ArgumentsPack args){
 		if(curPoint >= graph.size()) return null;
-		for(int id: graph.adj(curPoint))
-			if(graph.get(id).matches(method, args)){
+		for(int id: graph.adj(curPoint)){
+			InvocationDefinition invocation = graph.get(id);
+			if(invocation == null){
+				//If it is a dummy node
+				int cur = curPoint;
 				curPoint = id;
-				return graph.get(id);
+				InvocationDefinition temp = nextIvocation(method, args);
+				if(temp != null) return temp;
+				curPoint = cur;
+			}else{
+				if(invocation.matches(method, args)){
+					curPoint = id;
+					return graph.get(id);
+				}
 			}
+		}
 		return null;
 	}
 	
