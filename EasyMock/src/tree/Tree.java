@@ -15,9 +15,9 @@ public class Tree <T> {
 	private boolean isBranching = false;
 	private int size = 0;
 	
-	/*
+	/**
 	 * add a new node to the tree
-	 * @param T the new value to be added
+	 * @param val the new value to be added
 	 */
 	public void addNode(T val) {
 		if (root == null) {

@@ -15,18 +15,17 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	};
 	
 	
-	private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_VALUES = new HashMap<>();
+	private static final Map<Class<?>, Object> DEFAULT_RETURN_VALUES = new HashMap<>();
 	
 	static{
-		PRIMITIVES_DEFAULT_VALUES.put(boolean.class, false);
-		PRIMITIVES_DEFAULT_VALUES.put(byte.class, 0);
-		PRIMITIVES_DEFAULT_VALUES.put(char.class, '\0');
-		PRIMITIVES_DEFAULT_VALUES.put(double.class, 0.0);
-		PRIMITIVES_DEFAULT_VALUES.put(float.class, 0.0f);
-		PRIMITIVES_DEFAULT_VALUES.put(int.class, 0);
-		PRIMITIVES_DEFAULT_VALUES.put(long.class, 0L);
-		PRIMITIVES_DEFAULT_VALUES.put(short.class, 0);
-		PRIMITIVES_DEFAULT_VALUES.put(void.class, null);
+		DEFAULT_RETURN_VALUES.put(boolean.class, false);
+		DEFAULT_RETURN_VALUES.put(byte.class, 0);
+		DEFAULT_RETURN_VALUES.put(char.class, '\0');
+		DEFAULT_RETURN_VALUES.put(double.class, 0.0);
+		DEFAULT_RETURN_VALUES.put(float.class, 0.0f);
+		DEFAULT_RETURN_VALUES.put(int.class, 0);
+		DEFAULT_RETURN_VALUES.put(long.class, 0L);
+		DEFAULT_RETURN_VALUES.put(short.class, 0);
 	}
 	
 	private Tree<InvocationDefinition> tree = new Tree<>();
@@ -92,10 +91,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		}
 			
 		//If we are not replaying, return a default value
-		if(retType.isPrimitive())
-			return PRIMITIVES_DEFAULT_VALUES.get(retType);
-		else
-			return null;
+		return DEFAULT_RETURN_VALUES.get(retType);
 	}
 	
 	/**
