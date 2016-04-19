@@ -46,32 +46,70 @@ public class ExecutionGraph {
 		return null;
 	}
 	
-	static class Builder{
+	public static class Builder{
+		
+		private static class Branch{
+			public final Branch parent;
+			public int node; //The node id in graph
+			public Branch left;
+			public Branch right;
+			public Set<Integer> representatives; //The id of representatives of this node
+			
+			public Branch(int node, Branch parent){
+				this.node = node;
+				this.parent = parent;
+			}
+			
+			public void split(){
+				if(left != null || right != null) return;
+				left = new Branch(node, this);
+				right = new Branch(node, this);
+				left.representatives = representatives;
+				right.representatives = representatives;
+			}
+			
+			public Branch brother(){
+				if(parent == null) return null;
+				return parent.left == this? parent.right: parent.left;
+			}
+		}
 		
 		private final Graph<InvocationDefinition> graph;
-		private final Stack<Integer> switchPoints;
-		private final Stack<LinkedList<Integer>> branches;
 		private final int root;
+		private Branch current;
 		
 		public Builder(){
 			graph = new Graph<>();
-			switchPoints = new Stack<>();
-			branches = new Stack<>();
 			root = graph.add(null);
-			LinkedList<Integer> mainBranch = new LinkedList<Integer>();
-			mainBranch.add(0);
-			branches.add(mainBranch);
+			current = new Branch(root, null);
+			current.representatives = new HashSet<Integer>();
+			current.representatives.add(root);
 		}
 		
-		private int currentNode(){
-			return branches.peek().peekFirst();
+		
+		private boolean hasConfusion(int cur, Method method, ArgumentsPack args, boolean[] visited){
+			if(visited[cur]) return false;
+			visited[cur] = true;
+			for(int next: graph.adj(cur)){
+				InvocationDefinition invocation = graph.get(next);
+				if(invocation == null){
+					//If it is a dummy node
+					if(hasConfusion(next, method, args, visited))
+						return true;
+				} else if(invocation.matches(method, args))
+					return true;
+			}
+			return false;
 		}
 		
-		private int setCurrentNode(int val){
-			branches.peek().pollFirst();
-			branches.peek().addFirst(val);
-			return val;
+		private boolean hasConfusion(Set<Integer> begin, Method method, ArgumentsPack args){
+			boolean[] visited = new boolean[graph.size()];
+			for(int node: begin)
+				if(hasConfusion(node, method, args, visited))
+					return true;
+			return false;
 		}
+		
 		
 		/**
 		 * Add an invocation to the graph
@@ -82,20 +120,26 @@ public class ExecutionGraph {
 			if(i == null)
 				throw new NullPointerException();
 			
-			int cur = currentNode();
-			
-			//If the invocation is already defined in some nodes pointed from current node, return false
-			for(int id: graph.adj(cur))
-				if(graph.get(id).matches(i.method, i.args))
-					return false;
+			//If the invocation is redefined, return false
+			if(hasConfusion(current.representatives, i.method, i.args))
+				return false;
 			
 			//Otherwise, we add this invocation
-			graph.addEdge(cur, setCurrentNode(graph.add(i)));
+			int id = graph.add(i);
+			graph.addEdge(current.node, id);
+			current.node = id;
+			current.representatives = new HashSet<Integer>();
+			current.representatives.add(id);
 			return true;
 		}
 		
+		/**
+		 * Start a new branch, this method will split current branch into two sub-branches, and set current branch
+		 * into one of the two sub-branches
+		 */
 		public void startBranch(){
-			
+			 current.split();
+			 current = current.left;
 		}
 		
 		/**
@@ -103,8 +147,8 @@ public class ExecutionGraph {
 		 * @return if the operation is successful or not
 		 */
 		public boolean switchBranch(){
-			LinkedList<Integer> branch = branches.peek();
-			branch.add(branch.pollFirst());
+			if(current.parent == null) return false;
+			current = current.brother();
 			return true;
 		}
 		
@@ -113,11 +157,23 @@ public class ExecutionGraph {
 		 * @return if the operation is successful or not
 		 */
 		public boolean endBranch(){
+			if(current.parent == null) return false;
+			Branch brother = current.brother();
+			int dummy_node = graph.add(null);
+			graph.addEdge(current.node, dummy_node);
+			graph.addEdge(brother.node, dummy_node);
+			Set<Integer> representatives = current.representatives;
+			representatives.addAll(brother.representatives);
+			current = current.parent;
+			current.left = null;
+			current.right = null;
+			current.node = dummy_node;
+			current.representatives = representatives;
 			return true;
 		}
 		
 		public ExecutionGraph build(){
-			return null;
+			return new ExecutionGraph(graph, root);
 		}
 		
 	}
