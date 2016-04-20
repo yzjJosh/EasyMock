@@ -121,6 +121,7 @@ public class EasyMock {
 		int doit(String s, Integer i);
 		void foo(String s);
 		int doit2(String s) throws CustomedException;
+		int fun(int val);
 	}
 	
 	public static void main(String[] args){
@@ -130,20 +131,35 @@ public class EasyMock {
 		
 		f.foo(null);
 		expectLastCall().setPrint("node 1");
+		
 		startBranch(f);
-			expect(f.doit("", 0)).setPrint("node 2").setReturn(0);
+			expect(f.doit("  ", 0)).setPrint("node 2").setReturn(0);
 		switchBranch(f);
-			expect(f.doit("  ", 0)).setPrint("node 3").setReturn(0);
+			expect(f.doit(" ", 0)).setPrint("node 3").setReturn(0);
 		endBranch(f);
 		
 		startBranch(f);
-			f.foo(null);
-			expectLastCall().setPrint("node 4");
-		switchBranch(f);
-			expect(f.doit(" ", 4)).setPrint("node 5").setReturn(0);
+			startBranch(f);
+				startBranch(f);
+					startBranch(f);
+						startBranch(f);
+							expect(f.fun(0)).setReturn(0).setPrint("0");
+						switchBranch(f);
+							expect(f.fun(1)).setReturn(0).setPrint("1");
+						endBranch(f);
+					switchBranch(f);
+						expect(f.fun(2)).setReturn(0).setPrint("2");
+					endBranch(f);
+				switchBranch(f);
+					expect(f.fun(3)).setReturn(0).setPrint("3");
+				endBranch(f);
+			switchBranch(f);
+				expect(f.fun(4)).setReturn(0).setPrint("4");
+			endBranch(f);
 		endBranch(f);
+		
 		f.foo(null);
-		expectLastCall();
+		expectLastCall().setPrint("node 4\n");
 		
 		replay(f);
 		f.foo(null);
@@ -153,7 +169,31 @@ public class EasyMock {
 		replay(f);
 		f.foo(null);
 		f.doit("  ", 0);
-		f.doit(" ", 4);
+		f.fun(0);
+		f.foo(null);
+		
+		replay(f);
+		f.foo(null);
+		f.doit(" ", 0);
+		f.fun(1);
+		f.foo(null);
+		
+		replay(f);
+		f.foo(null);
+		f.doit(" ", 0);
+		f.fun(2);
+		f.foo(null);
+		
+		replay(f);
+		f.foo(null);
+		f.doit(" ", 0);
+		f.fun(3);
+		f.foo(null);
+		
+		replay(f);
+		f.foo(null);
+		f.doit(" ", 0);
+		f.fun(4);
 		f.foo(null);
 	}
 	

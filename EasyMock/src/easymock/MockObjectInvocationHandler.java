@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import exceptions.IllegalTypeException;
 import execution.*;
 
 
@@ -65,33 +64,43 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * @param method the method to be added
 	 * @param args the arguments of the method
 	 * @param behavior the behavior of this invocation
-	 * @throws IllegalStateException if is not in record state
+	 * @throws IllegalStateException if is not in record state, or if the operation cannot be completed
 	 */
 	void addInvocation(Method method, ArgumentsPack args, Behavior behavior){
 		if(state != State.RECORD)
 			throw new IllegalStateException("Not in record state!");
-		builder.addInvocation(new InvocationDefinition(method, args, behavior));
+		if(!builder.addInvocation(new InvocationDefinition(method, args, behavior)))
+			throw new IllegalStateException("Ambiguous invocation!");
 	}
 	
 	/**
 	 * Start branching.
+	 * @throws IllegalStateException if is not in record state
 	 */
 	void startBranch() {
+		if(state != State.RECORD)
+			throw new IllegalStateException("Not in record state!");
 		builder.startBranch();
 	}
 	
 	/**
 	 * Switch branching.
+	 * @throws IllegalStateException if is not in record state, or if the operation cannot be completed
 	 */
 	void switchBranch() {
+		if(state != State.RECORD)
+			throw new IllegalStateException("Not in record state!");
 		if (!builder.switchBranch())
 			throw new IllegalStateException("Switch is not legal!");
 	}
 	
 	/**
 	 * End branching.
+	 * @throws IllegalStateException if is not in record state, or if the operation cannot be completed
 	 */
 	void endBranch() {
+		if(state != State.RECORD)
+			throw new IllegalStateException("Not in record state!");
 		if (!builder.endBranch())
 			throw new IllegalStateException("End branching is not legal!");
 	}
