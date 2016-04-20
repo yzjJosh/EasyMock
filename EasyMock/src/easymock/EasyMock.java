@@ -116,9 +116,6 @@ public class EasyMock {
 	}
 	
 	
-	
-	
-	
 	//Following is an example
 	interface Foo{
 		int doit(String s, Integer i);
@@ -134,12 +131,19 @@ public class EasyMock {
 		f.foo(null);
 		expectLastCall().setPrint("node 1");
 		startBranch(f);
-			expect(f.doit("  ", 0)).setPrint("node 2").setReturn(0);
+			expect(f.doit("", 0)).setPrint("node 2").setReturn(0);
 		switchBranch(f);
 			expect(f.doit("  ", 0)).setPrint("node 3").setReturn(0);
 		endBranch(f);
+		
+		startBranch(f);
+			f.foo(null);
+			expectLastCall().setPrint("node 4");
+		switchBranch(f);
+			expect(f.doit(" ", 4)).setPrint("node 5").setReturn(0);
+		endBranch(f);
 		f.foo(null);
-		expectLastCall().setPrint("node 4");
+		expectLastCall();
 		
 		replay(f);
 		f.foo(null);
@@ -149,8 +153,8 @@ public class EasyMock {
 		replay(f);
 		f.foo(null);
 		f.doit("  ", 0);
+		f.doit(" ", 4);
 		f.foo(null);
-		
 	}
 	
 }
