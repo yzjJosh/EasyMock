@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import exceptions.IllegalTypeException;
 import execution.*;
 
 
@@ -83,14 +84,16 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 	 * Switch branching.
 	 */
 	void switchBranch() {
-		builder.switchBranch();
+		if (!builder.switchBranch())
+			throw new IllegalStateException("Switch is not legal!");
 	}
 	
 	/**
 	 * End branching.
 	 */
 	void endBranch() {
-		builder.endBranch();
+		if (!builder.endBranch())
+			throw new IllegalStateException("End branching is not legal!");
 	}
 	
 	

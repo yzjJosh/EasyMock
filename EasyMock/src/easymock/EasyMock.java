@@ -147,7 +147,7 @@ public class EasyMock {
 		
 		replay(f);
 		f.foo(null);
-		f.doit("", 0);
+		f.doit("  ", 0);
 		f.foo(null);
 		
 		replay(f);
