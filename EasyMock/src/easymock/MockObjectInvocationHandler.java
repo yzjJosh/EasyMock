@@ -45,7 +45,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		//If we are replaying this mock object
 		if(state == State.REPLAY) {
 			//If the behavior is defined for this invocation, we behave as defined.
-			InvocationDefinition invocation = graph.nextIvocation(method, argsPack);
+			InvocationDefinition invocation = graph.nextInvocation(method, argsPack);
 			if (invocation != null && invocation.isBehaviorLegal()) {
 				return invocation.behavior.behave();
 			}

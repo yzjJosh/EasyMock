@@ -36,7 +36,7 @@ public class ExecutionGraph {
 	 * @param args the arguments passed to the method
 	 * @return the invocation which matches the input. Null if cannot find a match.
 	 */
-	public InvocationDefinition nextIvocation(Method method, ArgumentsPack args){
+	public InvocationDefinition nextInvocation(Method method, ArgumentsPack args){
 		if(curPoint >= graph.size()) return null;
 		for(int id: graph.adj(curPoint)){
 			InvocationDefinition invocation = graph.get(id);
@@ -44,7 +44,7 @@ public class ExecutionGraph {
 				//If it is a dummy node
 				int cur = curPoint;
 				curPoint = id;
-				InvocationDefinition temp = nextIvocation(method, args);
+				InvocationDefinition temp = nextInvocation(method, args);
 				if(temp != null) return temp;
 				curPoint = cur;
 			}else{

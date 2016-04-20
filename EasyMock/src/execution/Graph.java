@@ -52,8 +52,8 @@ public class Graph <T> {
 	}
 	
 	/**
-	 * Return the number of nodes in this DAG
-	 * @return
+	 * Return the number of nodes in this graph
+	 * @return the size of this graph
 	 */
 	public int size(){
 		return values.size();
