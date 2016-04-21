@@ -3,19 +3,19 @@ package trading_system;
 import java.util.ArrayList;
 import java.util.List;
 import easymock.*;
+/*
+ * SystemTester
+ * This class is intended to mock the trading system service 
+ * and test the easymock function modules.
+ */
 public class SystemTester {
-
-	TradingSystem tradingSystem;
-	TradingService tradingService;
 	
-	public static void main(String[] args) {
-		SystemTester tester = new SystemTester();
-		tester.setUp();
-		System.out.println(tester.testCommodityValue());
-	}
+	TradingSystem tradingSystem;
+	//The trading service is to be mocked.
+	TradingService tradingService;
 
 	/*
-	 * test the whole value of the commodities.
+	 * Test the whole value of the commodities in the trading system.
 	 * @return if the mocking value is correct.
 	 */
 	public boolean testCommodityValue() {
@@ -25,13 +25,13 @@ public class SystemTester {
 		
 		commodities.add(fish);
 		commodities.add(beef);
-		tradingSystem.setStocks(commodities);
+		tradingSystem.setCommodities(commodities);
 
 		EasyMock.expect(tradingService.getPrice(fish)).setReturn(50.00);
 		EasyMock.expect(tradingService.getPrice(beef)).setReturn(1000.00);
 		
 		EasyMock.replay(tradingService);
-		double marketValue = tradingSystem.getMarketValue();
+		double marketValue = tradingSystem.getCommodityValue();
 		return marketValue == 100500.0;
 	}
 
@@ -41,7 +41,14 @@ public class SystemTester {
 	public void setUp() {
 		tradingSystem = new TradingSystem();
 		tradingService = (TradingService) EasyMock.createMock(TradingService.class);
-		tradingSystem.setStockService(tradingService);
+		tradingSystem.setTradingService(tradingService);
 		EasyMock.record(tradingService);
+	}
+	
+	
+	public static void main(String[] args) {
+		SystemTester tester = new SystemTester();
+		tester.setUp();
+		System.out.println(tester.testCommodityValue());
 	}
 }

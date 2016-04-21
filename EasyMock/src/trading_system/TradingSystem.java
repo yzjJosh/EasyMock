@@ -6,28 +6,45 @@ public class TradingSystem {
 	private TradingService tradingService;
 	private List<Commodity> commodities;
 	
-	public TradingService getStockService() {
+	/*
+	 * Get the trading service.
+	 * @return the service the system provides.
+	 */
+	public TradingService getTradingService() {
 		return tradingService;
 	}
-	
-	public void setStockService(TradingService tradingService) {
+	/*
+	 * Set the service the system provides.
+	 */
+	public void setTradingService(TradingService tradingService) {
 		this.tradingService = tradingService;
 	}
 	
-	public List<Commodity> getStocks() {
+	/*
+	 * Get the trading commodities.
+	 * @return the commodities the system provides.
+	 */
+	public List<Commodity> getCommodities() {
 		return commodities;
 	}
 	
-	public void setStocks(List<Commodity> commodities) {
+	/*
+	 * Set the commodities.
+	 */
+	public void setCommodities(List<Commodity> commodities) {
 		this.commodities = commodities;
 	}
 	
-	public double getMarketValue() {
-		double marketValue = 0.0;
+	/*
+	 * Get the whole value of the commodities.
+	 * @return the whole value.
+	 */
+	public double getCommodityValue() {
+		double value = 0.0;
 		
 		for (Commodity commodity : commodities) {
-			marketValue += tradingService.getPrice(commodity) * commodity.getQuantity();
+			value += tradingService.getPrice(commodity) * commodity.getQuantity();
 		}
-		return marketValue;
+		return value;
 	}
 }
