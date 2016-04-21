@@ -1,5 +1,5 @@
 package trading_system;
 
-public class TradingService {
-
+public interface TradingService {
+	public double getPrice(Commodity commodity);
 }
