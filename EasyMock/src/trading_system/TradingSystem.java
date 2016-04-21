@@ -14,11 +14,11 @@ public class TradingSystem {
 		this.tradingService = tradingService;
 	}
 	
-	public List getStocks() {
+	public List<Commodity> getStocks() {
 		return commodities;
 	}
 	
-	public void setStocks(List commodities) {
+	public void setStocks(List<Commodity> commodities) {
 		this.commodities = commodities;
 	}
 	
