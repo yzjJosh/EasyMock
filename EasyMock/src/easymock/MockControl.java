@@ -118,7 +118,7 @@ public class MockControl {
 	 * Controller which controls the behavior of a method with a return value
 	 *
 	 */
-	 class ControlReturn extends Control <ControlReturn> {
+	 public class ControlReturn extends Control <ControlReturn> {
 		 
 		 public ControlReturn(){
 				if(method.getReturnType() == void.class || method.getReturnType() == Void.class)
