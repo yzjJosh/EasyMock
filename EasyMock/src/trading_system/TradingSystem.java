@@ -1,10 +1,15 @@
 package trading_system;
 
-import java.util.List;
+
+
+import exceptions.CustomedException;
+
+
+import java.util.Map;
 
 public class TradingSystem {
 	private TradingService tradingService;
-	private List<Commodity> commodities;
+	private Map<Commodity,Integer> inventory;
 	
 	/*
 	 * Get the trading service.
@@ -24,15 +29,15 @@ public class TradingSystem {
 	 * Get the trading commodities.
 	 * @return the commodities the system provides.
 	 */
-	public List<Commodity> getCommodities() {
-		return commodities;
+	public Map<Commodity,Integer> getCommodities() {
+		return inventory;
 	}
 	
 	/*
 	 * Set the commodities.
 	 */
-	public void setCommodities(List<Commodity> commodities) {
-		this.commodities = commodities;
+	public void setCommodities(Map<Commodity,Integer> commodities) {
+		this.inventory = commodities;
 	}
 	
 	/*
@@ -41,9 +46,42 @@ public class TradingSystem {
 	 */
 	public double getCommodityValue() {
 		double value = 0.0;
-		
-		for (Commodity commodity : commodities) {
-			value += tradingService.getPrice(commodity) * commodity.getQuantity();
+
+			for (Commodity commodity : inventory.keySet()) {
+				value += tradingService.getPrice(commodity,"mean") * inventory.get(commodity);
+			}
+
+
+		return value;
+	}
+
+	public double addCommodity(Commodity commodity,int quantity){
+		double val = 0.0;
+		if(!inventory.containsKey(commodity)){
+			inventory.put(commodity,quantity);
+		}else{
+			inventory.put(commodity,inventory.get(commodity)+quantity);
+
+		}
+		val = tradingService.getPrice(commodity,"buying")*quantity;
+
+
+		return val;
+	}
+
+	public double sellCommodity(Commodity commodity,int quantitiy ){
+		double value = 0.0;
+		if(quantitiy>inventory.get(commodity))
+			throw new IllegalArgumentException("We only have"+inventory.get(commodity)+ " "+commodity.getTicker());
+		else{
+			//try{
+				value = tradingService.getPrice(commodity,"selling")*quantitiy;
+
+			//}catch (CustomedException e){
+
+			//	System.out.println(commodity.getTicker()+" is not on the market for now.");
+			//}
+
 		}
 		return value;
 	}
