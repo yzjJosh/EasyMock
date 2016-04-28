@@ -1,5 +1,6 @@
 package trading_system;
 
+import exceptions.CustomedException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,7 +65,7 @@ public class TradingSystemTest0 {
     }
 
     @Test
-    public void testBuyingFunction(){
+    public void testBuyingFunction() throws CustomedException{
 
         Map<Commodity,Integer> commodities = new HashMap<>();
         Commodity fish = new Commodity("1", "Fish");
@@ -72,16 +73,27 @@ public class TradingSystemTest0 {
         commodities.put(fish,200);
         commodities.put(beef,300);
         tradingSystem.setCommodities(commodities);
+        try{
+        expect(tradingService.getQuantity(beef)).andReturn(100);
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
 
         expect(tradingService.getPrice(beef,"buying")).andReturn(600.00);
+        try{
+            expect(tradingService.getQuantity(fish)).andReturn(100);
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+
         expect(tradingService.getPrice(fish,"buying")).andReturn(40.00);
         replay(tradingService);
 
 
-        assertEquals(tradingSystem.addCommodity(beef,100),600.00*100,0.00);
+        assertEquals(tradingSystem.addCommodity(beef),600.00*100,0.00);
         assertEquals(300+100,(int)tradingSystem.getCommodities().get(beef));
 
-        assertEquals(tradingSystem.addCommodity(fish,100),40.00*100,0.00);
+        assertEquals(tradingSystem.addCommodity(fish),40.00*100,0.00);
         assertEquals(200+100,(int)tradingSystem.getCommodities().get(fish));
     }
 }
