@@ -36,6 +36,7 @@ public class MockObjectInvocationHandler implements InvocationHandler{
 		if(method.equals(HandlerHelper.class.getMethod("getHandler", new Class<?>[0])))
 			return this;
 		
+		if(args == null) args = new Object[0];
 		ArgumentsPack argsPack = new ArgumentsPack(args);
 		Class<?> retType = method.getReturnType();
 		
