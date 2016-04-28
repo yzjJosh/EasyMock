@@ -76,7 +76,7 @@ public class TradingSystem {
 		else{
 			//try{
 				value = tradingService.getPrice(commodity,"selling")*quantitiy;
-
+					inventory.put(commodity,inventory.get(commodity)-quantitiy);
 			//}catch (CustomedException e){
 
 			//	System.out.println(commodity.getTicker()+" is not on the market for now.");
