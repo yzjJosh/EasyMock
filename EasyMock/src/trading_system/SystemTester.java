@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
 import exceptions.CustomedException;
 import exceptions.IllegalTypeException;
 import easymock.*;
-import sun.jvm.hotspot.utilities.Assert;
+import static org.junit.Assert.*;
 
 /*
  * SystemTester
