@@ -5,6 +5,7 @@ package trading_system;
 import exceptions.CustomedException;
 
 
+import java.util.List;
 import java.util.Map;
 
 public class TradingSystem {
@@ -55,8 +56,9 @@ public class TradingSystem {
 		return value;
 	}
 
-	public double addCommodity(Commodity commodity,int quantity){
+	public double addCommodity(Commodity commodity) throws CustomedException{
 		double val = 0.0;
+		int quantity = tradingService.getQuantity(commodity);
 		if(!inventory.containsKey(commodity)){
 			inventory.put(commodity,quantity);
 		}else{
@@ -72,11 +74,11 @@ public class TradingSystem {
 	public double sellCommodity(Commodity commodity,int quantitiy ){
 		double value = 0.0;
 		if(quantitiy>inventory.get(commodity))
-			throw new IllegalArgumentException("We only have"+inventory.get(commodity)+ " "+commodity.getTicker());
+			throw new IllegalArgumentException("We only have "+inventory.get(commodity)+ " "+commodity.getTicker());
 		else{
 			//try{
 				value = tradingService.getPrice(commodity,"selling")*quantitiy;
-					inventory.put(commodity,inventory.get(commodity)-quantitiy);
+				inventory.put(commodity,inventory.get(commodity)-quantitiy);
 			//}catch (CustomedException e){
 
 			//	System.out.println(commodity.getTicker()+" is not on the market for now.");
@@ -84,5 +86,13 @@ public class TradingSystem {
 
 		}
 		return value;
+	}
+
+	public boolean sendRequest(int tag){
+		return tradingService.serviceAvailable(tag);
+	}
+
+	public List<Commodity> getList(){
+		return tradingService.commodityOnMarket();
 	}
 }
