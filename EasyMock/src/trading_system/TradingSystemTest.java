@@ -159,7 +159,7 @@ public class TradingSystemTest {
         try{
             tradingSystem.addCommodity(fish);
             System.out.print("WENWEN5");
-        }catch (Exception e){  System.out.print("WENWEN3");}
+        }catch (Exception e){ e.printStackTrace(); System.out.print("WENWEN3");}
         try{
             tradingSystem.addCommodity(fish);
         }catch (Exception e){  System.out.print("WENWEN4");}
