@@ -1,9 +1,6 @@
 package stock_system;
 
-//import easymock.EasyMock;
 import static org.easymock.EasyMock.*;
-
-import easymock.EasyMock;
 import exceptions.CustomedException;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,23 +27,79 @@ public class StockSystemTest {
         stockSystem.setStockMarket(stockMarket);
         EasyMock.record(stockMarket);
     }
-    @Test(expected = RuntimeException.class)
+
+    @Test
     public void testStockValue(){
         Map<Stock,Integer> stocks = new HashMap<>();
         Stock Apple = new Stock("1", "Apple");
         Stock Google = new Stock("2", "Google");
-
         stocks.put(Apple,200);
         stocks.put(Google,300);
         stockSystem.setStocks(stocks);
 
         EasyMock.expect(stockMarket.getPrice(Google, "mean")).setReturn(691.09);
-        EasyMock.expect(stockMarket.getPrice(Apple,"mean")).setReturn(94.83);
+        EasyMock.expect(stockMarket.getPrice(Apple, "mean")).setReturn(94.83);
         EasyMock.replay(stockMarket);
 
         assertEquals(stockSystem.getStockValue(), 200 * 94.83 + 300 * 691.09, 0.00);
     }
 
+    @Test
+    public void testSellingFunction(){
+
+        Map<Stock,Integer> stocks = new HashMap<>();
+        Stock Apple = new Stock("1", "Apple");
+        Stock Google = new Stock("2", "Google");
+        stocks.put(Apple,200);
+        stocks.put(Google,300);
+        stockSystem.setStocks(stocks);
+
+        EasyMock.expect(stockMarket.getPrice(Google, "selling")).setReturn(714.17);
+        EasyMock.expect(stockMarket.getPrice(Apple, "selling")).setReturn(97.88);
+        EasyMock.replay(stockMarket);
+
+
+        try{assertEquals(stockSystem.sellStock(Google,100),714.17*100,0.00);}
+        catch(CustomedException e){System.out.println(e);}
+        try{
+            assertEquals(stockSystem.sellStock(Apple,100),97.88*100,0.00);}
+        catch (CustomedException e){System.out.println(e);}
+        assertEquals(300 - 100, (int) stockSystem.getStockList().get(Google));
+        assertEquals(200 - 100, (int) stockSystem.getStockList().get(Apple));
+    }
+
+    @Test
+    public void testBuyingFunction() throws CustomedException{
+
+        Map<Stock,Integer> stocks = new HashMap<>();
+        Stock Apple = new Stock("1", "Apple");
+        Stock Google = new Stock("2", "Google");
+        stocks.put(Apple,200);
+        stocks.put(Google,300);
+        stockSystem.setStocks(stocks);
+        try{
+            EasyMock.expect(stockMarket.getQuantity(Google)).setReturn(100);
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+
+        EasyMock.expect(stockMarket.getPrice(Google, "buying")).setReturn(689.55);
+        try{
+            EasyMock.expect(stockMarket.getQuantity(Apple)).setReturn(100);
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+
+        EasyMock.expect(stockMarket.getPrice(Apple, "buying")).setReturn(94.83);
+        EasyMock.replay(stockMarket);
+
+
+        assertEquals(stockSystem.buyStock(Google),689.55*100,0.00);
+        assertEquals(300+100,(int)stockSystem.getStockList().get(Google));
+
+        assertEquals(stockSystem.buyStock(Apple),94.83*100,0.00);
+        assertEquals(200+100,(int)stockSystem.getStockList().get(Apple));
+    }
 
     @Test
     public void testAsWhole(){
@@ -67,18 +120,13 @@ public class StockSystemTest {
         EasyMock.switchBranch(stockMarket);
         EasyMock.expect(stockMarket.serviceAvailable(0)).setReturn(false);
         EasyMock.endBranch(stockMarket);
-
-
         EasyMock.expect(stockMarket.getPrice(Google,"mean")).setReturn(691.09).setPrint("evaluate Google");
         EasyMock.expect(stockMarket.getPrice(Apple,"mean")).setReturn(94.83).setPrint("evaluate Apple");
-
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
-
         EasyMock.expect(stockMarket.getPrice(Google,"selling")).setReturn(714.17).setPrint("sell Google");
-
         EasyMock.switchBranch(stockMarket);
         EasyMock.expect(stockMarket.getPrice(Apple,"selling")).setReturn(97.88).setPrint("sell Apple");
         EasyMock.endBranch(stockMarket);
@@ -91,8 +139,6 @@ public class StockSystemTest {
         EasyMock.switchBranch(stockMarket);
         EasyMock.expect(stockMarket.stockOnMarket()).setReturn(list).setPrint(" Stock list");
         EasyMock.endBranch(stockMarket);
-
-        // EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
@@ -104,7 +150,6 @@ public class StockSystemTest {
         try{
             EasyMock.expect( stockMarket.getQuantity(Google)).setReturn(4000).setThrowable(new CustomedException("There is no Google on the market for now")).setPrint("buy Google");
         }catch (CustomedException e){
-
         }
         EasyMock.expect(stockMarket.getPrice(Google,"buying")).setReturn(689.55).setPrint("buy Google");
         EasyMock.endBranch(stockMarket);
@@ -117,9 +162,6 @@ public class StockSystemTest {
         }
         EasyMock.expect(stockMarket.getPrice(Apple,"buying")).setReturn(97.88).setPrint("buy Apple");
         EasyMock.endBranch(stockMarket);
-
-
-        //  EasyMock.endBranch(stockMarket);
 
         EasyMock.replay(stockMarket);// start real testing!!!
 
@@ -135,7 +177,6 @@ public class StockSystemTest {
         EasyMock.replay(stockMarket);
         assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
-
 
         EasyMock.replay(stockMarket);// start real testing!!!
 
@@ -212,8 +253,6 @@ public class StockSystemTest {
         EasyMock.replay(stockMarket);
         assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
-
-
     }
 
 }
