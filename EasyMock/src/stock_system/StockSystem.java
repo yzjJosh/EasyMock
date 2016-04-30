@@ -96,5 +96,5 @@ public class StockSystem {
 
     public double getAmountOfMoney(){return amountOfMoney;}
 
-    public String getSummary(){return (String)"Now we have " + getAmountOfMoney()+" dollars and stocks worth"+ getStockValue()+" dollars \n \n";}
+    public String getSummary(){return (String)"Now we have " + getAmountOfMoney()+" dollars and stocks worth "+ getStockValue()+" dollars \n \n";}
 }

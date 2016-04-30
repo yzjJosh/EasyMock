@@ -118,8 +118,7 @@ public class StockSystemTest {
         EasyMock.expect(stockMarket.getPrice(Apple,"buying")).setReturn(97.88).setPrint("buy Apple");
         EasyMock.endBranch(stockMarket);
 
-        EasyMock.expect(stockMarket.getPrice(Google,"mean")).setReturn(691.09).setPrint("evaluate Google");
-        EasyMock.expect(stockMarket.getPrice(Apple,"mean")).setReturn(94.83).setPrint("evaluate Apple");
+
         //  EasyMock.endBranch(stockMarket);
 
         EasyMock.replay(stockMarket);// start real testing!!!
@@ -133,6 +132,8 @@ public class StockSystemTest {
         try{moneyEarned+=stockSystem.sellStock(Apple,100);}catch (CustomedException e){System.out.println(e);}
         try{moneyEarned+=stockSystem.sellStock(Apple,100000);}catch (CustomedException e){System.out.println(e);}
         assertEquals(stockSystem.getAmountOfMoney(),moneyEarned+moneyOriginal,0.00);
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
 
 
@@ -147,6 +148,9 @@ public class StockSystemTest {
         try{moneyEarned+=stockSystem.sellStock(Google,100);}catch (CustomedException e){System.out.println(e);}
         try{moneyEarned+=stockSystem.sellStock(Google,100);}catch (CustomedException e){System.out.println(e);}
         assertEquals(stockSystem.getAmountOfMoney(),moneyEarned+moneyOriginal,0.00);
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
 
         //test3
@@ -160,13 +164,19 @@ public class StockSystemTest {
         }catch (CustomedException e){
             System.out.println(e);
         }
-        System.out.println("\n \n");
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
 
         //test4
         System.out.println("test4 \n");
         EasyMock.replay(stockMarket);
         if(!stockSystem.sendRequest(0))
             System.out.println("Stock Market Service is not available");
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
 
         //test5
@@ -181,6 +191,9 @@ public class StockSystemTest {
             moneyUsed = stockSystem.buyStock(stockOnMarket.get(0));
         }catch (CustomedException e){  System.out.println(e);}
         assertEquals(stockSystem.getAmountOfMoney(),moneyOriginal-moneyUsed,0.00);
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
 
         //test6
@@ -195,6 +208,9 @@ public class StockSystemTest {
             moneyUsed = stockSystem.buyStock(stockOnMarket.get(0));
         }catch (CustomedException e){  System.out.println(e);}
         assertEquals(stockSystem.getAmountOfMoney(),moneyOriginal-moneyUsed,0.00);
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
 
 
