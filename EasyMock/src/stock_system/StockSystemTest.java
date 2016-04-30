@@ -1,6 +1,9 @@
 package stock_system;
 
+//import easymock.EasyMock;
 import static org.easymock.EasyMock.*;
+
+import easymock.EasyMock;
 import exceptions.CustomedException;
 import org.junit.Before;
 import org.junit.Test;
@@ -120,25 +123,44 @@ public class StockSystemTest {
         EasyMock.switchBranch(stockMarket);
         EasyMock.expect(stockMarket.serviceAvailable(0)).setReturn(false);
         EasyMock.endBranch(stockMarket);
+
+
         EasyMock.expect(stockMarket.getPrice(Google,"mean")).setReturn(691.09).setPrint("evaluate Google");
         EasyMock.expect(stockMarket.getPrice(Apple,"mean")).setReturn(94.83).setPrint("evaluate Apple");
+
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
+
         EasyMock.expect(stockMarket.getPrice(Google,"selling")).setReturn(714.17).setPrint("sell Google");
+
         EasyMock.switchBranch(stockMarket);
         EasyMock.expect(stockMarket.getPrice(Apple,"selling")).setReturn(97.88).setPrint("sell Apple");
         EasyMock.endBranch(stockMarket);
         EasyMock.switchBranch(stockMarket);
+        try{
+            EasyMock.expect(stockMarket.getQuantity(Google)).setReturn(50).setPrint("Google on the market");
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
         EasyMock.expect(stockMarket.getPrice(Google,"buying")).setReturn(689.55).setPrint("buy Google");
         EasyMock.endBranch(stockMarket);
         EasyMock.switchBranch(stockMarket);
+        try{
+            EasyMock.expect(stockMarket.getQuantity(Apple)).setReturn(100).setPrint("Apple on the market");
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
         EasyMock.expect(stockMarket.getPrice(Apple,"buying")).setReturn(97.88).setPrint("buy Apple");
         EasyMock.endBranch(stockMarket);
         EasyMock.switchBranch(stockMarket);
         EasyMock.expect(stockMarket.stockOnMarket()).setReturn(list).setPrint(" Stock list");
         EasyMock.endBranch(stockMarket);
+
+        // EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
         EasyMock.startBranch(stockMarket);
@@ -150,6 +172,7 @@ public class StockSystemTest {
         try{
             EasyMock.expect( stockMarket.getQuantity(Google)).setReturn(4000).setThrowable(new CustomedException("There is no Google on the market for now")).setPrint("buy Google");
         }catch (CustomedException e){
+
         }
         EasyMock.expect(stockMarket.getPrice(Google,"buying")).setReturn(689.55).setPrint("buy Google");
         EasyMock.endBranch(stockMarket);
@@ -162,6 +185,9 @@ public class StockSystemTest {
         }
         EasyMock.expect(stockMarket.getPrice(Apple,"buying")).setReturn(97.88).setPrint("buy Apple");
         EasyMock.endBranch(stockMarket);
+
+
+        //  EasyMock.endBranch(stockMarket);
 
         EasyMock.replay(stockMarket);// start real testing!!!
 
@@ -177,6 +203,7 @@ public class StockSystemTest {
         EasyMock.replay(stockMarket);
         assertTrue(stockSystem.sendRequest(1));
         System.out.println(stockSystem.getSummary());
+
 
         EasyMock.replay(stockMarket);// start real testing!!!
 
@@ -249,6 +276,139 @@ public class StockSystemTest {
             moneyUsed = stockSystem.buyStock(stockOnMarket.get(0));
         }catch (CustomedException e){  System.out.println(e);}
         assertEquals(stockSystem.getAmountOfMoney(),moneyOriginal-moneyUsed,0.00);
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test7
+        System.out.println("test7 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 2100*94.83, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        stockOnMarket = stockSystem.getList();
+        try{
+            moneyUsed = stockSystem.buyStock(stockOnMarket.get(1));
+        }catch (CustomedException e){  System.out.println(e);}
+        assertEquals(stockSystem.getAmountOfMoney(),moneyOriginal-moneyUsed,0.00);
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test8
+        System.out.println("test8 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 2100*94.83, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyEarned = 0;
+        try{moneyEarned+=stockSystem.sellStock(Apple,100);}catch (CustomedException e){System.out.println(e);}
+        try{moneyEarned+=stockSystem.sellStock(Apple, 100);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test9
+        System.out.println("test9 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1900*94.83, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyEarned = 0;
+        try{moneyEarned+=stockSystem.sellStock(Apple,200);}catch (CustomedException e){System.out.println(e);}
+        try{moneyEarned+=stockSystem.sellStock(Apple, 100);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test10
+        System.out.println("test10 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1600*94.83, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        try{moneyUsed+=stockSystem.buyStock(Apple);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test11
+        System.out.println("test11 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1700*94.83, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Apple);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test12
+        System.out.println("test12 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1700*94.83+50*691.09, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        moneyEarned = 0;
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        try{moneyEarned+=stockSystem.sellStock(Apple,500);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test13
+        System.out.println("test13 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1200*94.83+100*691.09, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        moneyEarned = 0;
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test14
+        System.out.println("test14 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1200*94.83+150*691.09, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        moneyEarned = 0;
+        try{moneyEarned+=stockSystem.sellStock(Apple,200);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Apple);}catch (CustomedException e){System.out.println(e);}
+
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        System.out.println(stockSystem.getSummary());
+
+        //test15
+        System.out.println("test15 \n");
+        EasyMock.replay(stockMarket);
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 1000*94.83+150*691.09, 0.00);
+        moneyOriginal = stockSystem.getAmountOfMoney();
+        moneyUsed = 0;
+        moneyEarned = 0;
+        try{moneyEarned+=stockSystem.sellStock(Google,100);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
 
         EasyMock.replay(stockMarket);
         assertTrue(stockSystem.sendRequest(1));

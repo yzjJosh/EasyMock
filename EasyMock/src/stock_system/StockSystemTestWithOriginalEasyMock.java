@@ -257,5 +257,236 @@ public class StockSystemTestWithOriginalEasyMock {
         assertEquals(stockSystem.getAmountOfMoney(),moneyOriginal-moneyUsed,0.00);
         System.out.println("\n \n");
     }
+    @Test
+    public void test7(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        expect(stockMarket.stockOnMarket()).andReturn(list);
+        try{
+            expect( stockMarket.getQuantity(Google)).andReturn(4000).andThrow(new CustomedException("There is no Google on the market for now"));
+        }catch (CustomedException e){
 
+        }
+        expect(stockMarket.getPrice(Google,"buying")).andReturn(689.55);
+        replay(stockMarket);
+
+        //test7
+        System.out.println("test7 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        List<Stock> stockOnMarket = stockSystem.getList();
+        try{
+            moneyUsed = stockSystem.buyStock(stockOnMarket.get(1));
+        }catch (CustomedException e){  System.out.println(e);}
+        assertEquals(stockSystem.getAmountOfMoney(),moneyOriginal-moneyUsed,0.00);
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test8(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        expect(stockMarket.getPrice(Apple, "selling")).andReturn(97.88);
+        expect(stockMarket.getPrice(Apple, "selling")).andReturn(97.88);
+        replay(stockMarket);
+
+        //test8
+        System.out.println("test8 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyEarned = 0;
+        try{moneyEarned+=stockSystem.sellStock(Apple,100);}catch (CustomedException e){System.out.println(e);}
+        try{moneyEarned+=stockSystem.sellStock(Apple, 100);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+
+    @Test
+    public void test9(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        expect(stockMarket.getPrice(Apple, "selling")).andReturn(97.88);
+        expect(stockMarket.getPrice(Google, "selling")).andReturn(714.17);
+        replay(stockMarket);
+
+        //test9
+        System.out.println("test9 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyEarned = 0;
+        try{moneyEarned+=stockSystem.sellStock(Apple,100);}catch (CustomedException e){System.out.println(e);}
+        try{moneyEarned+=stockSystem.sellStock(Google, 100);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test10(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        try{
+            expect(stockMarket.getQuantity(Apple)).andReturn(100);
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+        expect(stockMarket.getPrice(Apple,"buying")).andReturn(97.88);
+        try{
+            expect( stockMarket.getQuantity(Google)).andReturn(4000).andThrow(new CustomedException("There is no Google on the market for now"));
+        }catch (CustomedException e){
+
+        }
+      expect(stockMarket.getPrice(Google,"buying")).andReturn(689.55);
+        replay(stockMarket);
+
+        //test10
+        System.out.println("test10 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        try{moneyUsed+=stockSystem.buyStock(Apple);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test11(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        try{
+            expect(stockMarket.getQuantity(Google)).andReturn(50);
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+        expect(stockMarket.getPrice(Google, "buying")).andReturn(689.55);
+        try{
+            expect(stockMarket.getQuantity(Apple)).andReturn(2000);
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+        expect(stockMarket.getPrice(Apple, "buying")).andReturn(97.88);
+        replay(stockMarket);
+
+        //test11
+        System.out.println("test10 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Apple);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test12(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        try{
+            expect(stockMarket.getQuantity(Google)).andReturn(50);
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+        expect(stockMarket.getPrice(Google, "buying")).andReturn(689.55);
+        expect(stockMarket.getPrice(Apple, "selling")).andReturn(97.88);
+        replay(stockMarket);
+
+        //test12
+        System.out.println("test12 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        try{stockSystem.sellStock(Apple, 500);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test13(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        try{
+            expect(stockMarket.getQuantity(Google)).andReturn(50);
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+        expect(stockMarket.getPrice(Google, "buying")).andReturn(689.55);
+        try{
+            expect( stockMarket.getQuantity(Google)).andReturn(4000).andThrow(new CustomedException("There is no Google on the market for now"));
+        }catch (CustomedException e){
+
+        }
+        expect(stockMarket.getPrice(Google,"buying")).andReturn(689.55);
+        replay(stockMarket);
+
+        //test13
+        System.out.println("test13 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test14(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        expect(stockMarket.getPrice(Apple,"selling")).andReturn(714.17);
+        try{
+            expect(stockMarket.getQuantity(Apple)).andReturn(2000);
+
+        }catch (CustomedException e){
+            System.out.print(e);
+        }
+        expect(stockMarket.getPrice(Apple,"buying")).andReturn(97.88);
+        replay(stockMarket);
+
+        //test14
+        System.out.println("test14 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        try{stockSystem.sellStock(Apple, 200);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Apple);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
+    @Test
+    public void test15(){
+        expect(stockMarket.serviceAvailable(1)).andReturn(true);
+        expect(stockMarket.getPrice(Google,"mean")).andReturn(691.09);
+        expect(stockMarket.getPrice(Apple, "mean")).andReturn(94.83);
+        expect(stockMarket.getPrice(Google, "selling")).andReturn(97.88);
+        try{
+            expect( stockMarket.getQuantity(Google)).andReturn(4000).andThrow(new CustomedException("There is no Google on the market for now"));
+        }catch (CustomedException e){
+
+        }
+        expect(stockMarket.getPrice(Google,"buying")).andReturn(689.55);
+        replay(stockMarket);
+
+
+        //test15
+        System.out.println("test15 \n");
+        assertTrue(stockSystem.sendRequest(1));
+        assertEquals(stockSystem.getStockValue(), 200*94.83+300 * 691.09, 0.00);
+        double moneyOriginal = stockSystem.getAmountOfMoney();
+        double moneyUsed = 0;
+        try{stockSystem.sellStock(Google,100);}catch (CustomedException e){System.out.println(e);}
+        try{moneyUsed+=stockSystem.buyStock(Google);}catch (CustomedException e){System.out.println(e);}
+        System.out.println("\n \n");
+    }
 }
